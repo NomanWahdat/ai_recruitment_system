@@ -1,0 +1,22 @@
+export type Candidate = {
+  id: number;
+  full_name: string;
+  email: string;
+  phone_number?: string;
+  cv_file?: string;
+  cv_filename?: string;
+  extracted_text?: string;
+  processing_status?: "pending" | "processing" | "completed" | "failed";
+  extraction_success?: boolean;
+  extraction_error?: string;
+  extracted_at?: string | null;
+  analysis_completed?: boolean;
+  analysis_error?: string;
+  analyzed_at?: string | null;
+  years_of_experience?: number;
+  skills?: string[];
+  education?: string;
+  linkedin_url?: string;
+  github_url?: string;
+  portfolio_url?: string;
+};
