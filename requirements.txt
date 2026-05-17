@@ -10,3 +10,6 @@ numpy==1.26.4
 spacy==3.7.6
 phonenumbers==8.13.45
 requests==2.32.3
+gunicorn==23.0.0
+whitenoise==6.9.0
+dj-database-url==2.3.0
