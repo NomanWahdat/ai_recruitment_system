@@ -6,35 +6,41 @@ An AI-powered recruitment screening platform that automates CV parsing, candidat
 
 ### Authentication
 
-| Sign In | Sign Up |
-|---------|---------|
-| ![Sign In](media/demo/signin.png) | ![Sign Up](media/demo/signup.png) |
+<p align="center">
+  <img src="https://raw.githubusercontent.com/NomanWahdat/ai_recruitment_system/main/media/demo/signin.png" width="48%" alt="Sign In" />
+  <img src="https://raw.githubusercontent.com/NomanWahdat/ai_recruitment_system/main/media/demo/signup.png" width="48%" alt="Sign Up" />
+</p>
 
-### Dashboard & Candidates
+### Dashboard
 
-| Dashboard | Candidates List |
-|-----------|----------------|
-| ![Dashboard](media/demo/dashboard.png) | ![Candidates](media/demo/candidates.png) |
+<p align="center">
+  <img src="https://raw.githubusercontent.com/NomanWahdat/ai_recruitment_system/main/media/demo/dashboard.png" width="100%" alt="Dashboard" />
+</p>
 
-| Candidate Detail |
-|-------------------|
-| ![Candidate Detail](media/demo/candidate_detail.png) |
+### Candidates
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/NomanWahdat/ai_recruitment_system/main/media/demo/candidates.png" width="48%" alt="Candidates List" />
+  <img src="https://raw.githubusercontent.com/NomanWahdat/ai_recruitment_system/main/media/demo/candidate_detail.png" width="48%" alt="Candidate Detail" />
+</p>
 
 ### Jobs & Rankings
 
-| Jobs List | Job Detail |
-|-----------|------------|
-| ![Jobs](media/demo/jobs.png) | ![Job Detail](media/demo/job_detail.png) |
+<p align="center">
+  <img src="https://raw.githubusercontent.com/NomanWahdat/ai_recruitment_system/main/media/demo/jobs.png" width="48%" alt="Jobs List" />
+  <img src="https://raw.githubusercontent.com/NomanWahdat/ai_recruitment_system/main/media/demo/job_detail.png" width="48%" alt="Job Detail" />
+</p>
 
-| Rankings |
-|----------|
-| ![Rankings](media/demo/rankings.png) |
+<p align="center">
+  <img src="https://raw.githubusercontent.com/NomanWahdat/ai_recruitment_system/main/media/demo/rankings.png" width="100%" alt="Rankings" />
+</p>
 
 ### AI Features
 
-| AI Tools | Automation |
-|----------|------------|
-| ![AI Tools](media/demo/ai_tools.png) | ![Automation](media/demo/automation.png) |
+<p align="center">
+  <img src="https://raw.githubusercontent.com/NomanWahdat/ai_recruitment_system/main/media/demo/ai_tools.png" width="48%" alt="AI Tools" />
+  <img src="https://raw.githubusercontent.com/NomanWahdat/ai_recruitment_system/main/media/demo/automation.png" width="48%" alt="Automation" />
+</p>
 
 ## Key Features
 
