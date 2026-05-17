@@ -118,4 +118,23 @@ CORS_ALLOWED_ORIGINS = config(
     cast=Csv(),
 )
 
+# AI Provider Settings
 OPENAI_API_KEY = config("OPENAI_API_KEY", default="")
+
+# Groq AI (Primary provider)
+GROQ_API_KEY = config("GROQ_API_KEY", default="")
+GROQ_API_URL = config("GROQ_API_URL", default="https://api.groq.com/openai/v1")
+GROQ_MODEL = config("GROQ_MODEL", default="llama3-8b-8192")
+
+# Gemini AI (Fallback provider)
+GEMINI_API_KEY = config("GEMINI_API_KEY", default="")
+GEMINI_MODEL = config("GEMINI_MODEL", default="gemini-pro")
+
+# Feature flags
+USE_GROQ_AI = config("USE_GROQ_AI", default=True, cast=bool)
+USE_GEMINI_FALLBACK = config("USE_GEMINI_FALLBACK", default=True, cast=bool)
+
+# Scoring weights
+SKILL_WEIGHT = config("SKILL_WEIGHT", default=0.5, cast=float)
+EXPERIENCE_WEIGHT = config("EXPERIENCE_WEIGHT", default=0.3, cast=float)
+EDUCATION_WEIGHT = config("EDUCATION_WEIGHT", default=0.2, cast=float)

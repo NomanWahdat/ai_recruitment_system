@@ -20,9 +20,10 @@ class GeminiProvider(AIProvider):
     """
 
     def __init__(self):
-        self.api_url = os.getenv("GEMINI_API_URL") or config("GEMINI_API_URL", default="")
         self.api_key = os.getenv("GEMINI_API_KEY") or config("GEMINI_API_KEY", default="")
-        self.model = os.getenv("GEMINI_MODEL") or config("GEMINI_MODEL", default="gemini-2.0-flash")
+        self.model = os.getenv("GEMINI_MODEL") or config("GEMINI_MODEL", default="gemini-pro")
+        default_url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent" if self.api_key else ""
+        self.api_url = os.getenv("GEMINI_API_URL") or config("GEMINI_API_URL", default=default_url)
 
     def _content_url(self) -> str:
         base_url = (self.api_url or "").rstrip("/")

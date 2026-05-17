@@ -1,103 +1,138 @@
 # AI Recruitment Screening System
 
-A production-ready Django backend foundation for an AI-powered recruitment screening platform. This project is prepared for future CV uploads, AI candidate analysis, candidate ranking, skill extraction, interview question generation, REST APIs, and dashboard integration.
+An AI-powered recruitment screening platform that automates CV parsing, candidate-job matching, ranking, and interview question generation. Built with Django REST Framework, Next.js, and integrated with **Groq AI** (primary) and **Google Gemini** (fallback) for intelligent hybrid scoring.
 
-## Features Included in Step 1
+## Screenshots
 
-- Modular Django project structure
-- Dedicated `recruitment` app
-- Django REST Framework configuration
-- PostgreSQL database configuration
-- Environment variable support with `python-decouple`
-- CORS support for frontend integration
-- Media upload configuration for future CV files
-- Static file configuration
-- Development and production settings split
-- Initial API health check endpoint
-- Git-ready project structure
+### Authentication
+
+| Sign In | Sign Up |
+|---------|---------|
+| ![Sign In](media/demo/signin.png) | ![Sign Up](media/demo/signup.png) |
+
+### Dashboard & Candidates
+
+| Dashboard | Candidates List |
+|-----------|----------------|
+| ![Dashboard](media/demo/dashboard.png) | ![Candidates](media/demo/candidates.png) |
+
+| Candidate Detail |
+|-------------------|
+| ![Candidate Detail](media/demo/candidate_detail.png) |
+
+### Jobs & Rankings
+
+| Jobs List | Job Detail |
+|-----------|------------|
+| ![Jobs](media/demo/jobs.png) | ![Job Detail](media/demo/job_detail.png) |
+
+| Rankings |
+|----------|
+| ![Rankings](media/demo/rankings.png) |
+
+### AI Features
+
+| AI Tools | Automation |
+|----------|------------|
+| ![AI Tools](media/demo/ai_tools.png) | ![Automation](media/demo/automation.png) |
+
+## Key Features
+
+- **Token-Based Authentication** - Sign up, sign in, sign out with DRF Token Authentication
+- **CV Parsing** - Upload PDF/DOCX resumes with automatic text extraction (PyPDF2, python-docx, spaCy NLP)
+- **Hybrid AI Matching** - Deterministic skill matching + LLM-powered scoring (75% local + 25% AI)
+- **Dual AI Providers** - Groq AI (primary, `llama-3.3-70b-versatile`) with Google Gemini fallback
+- **Candidate Ranking** - Weighted scoring across skills, experience, and education
+- **AI Interview Questions** - Auto-generated interview questions based on job-candidate match
+- **AI Match Explanations** - Natural language summaries of why a candidate fits a role
+- **Job Parsing** - AI-powered extraction of skills, role type, and experience level from job descriptions
+- **Event-Driven Automation** - Agent orchestrator with event bus for automatic processing pipelines
+- **Bulk CV Upload** - Upload multiple CVs at once for batch processing
+- **Modern Dashboard** - Next.js frontend with global search, notifications, and responsive design
 
 ## Tech Stack
 
-- Python 3.12+
-- Django 5.2
-- Django REST Framework
-- PostgreSQL
-- django-cors-headers
-- python-decouple
-- Pillow
-- PyPDF2
-- python-docx
+### Backend
 
-## Project Structure
+| Technology | Purpose |
+|------------|---------|
+| Python 3.12+ | Runtime |
+| Django 5.2 | Web framework |
+| Django REST Framework | API layer |
+| PostgreSQL | Database |
+| spaCy | NLP / entity extraction |
+| Groq AI | Primary LLM provider |
+| Google Gemini | Fallback LLM provider |
+| python-decouple | Environment config |
 
-```text
-ai_recruitment_system/
-├── manage.py
-├── requirements.txt
-├── .env.example
-├── .gitignore
-├── README.md
-├── config/
-│   ├── settings/
-│   │   ├── base.py
-│   │   ├── development.py
-│   │   ├── production.py
-│   │   └── __init__.py
-│   ├── urls.py
-│   ├── asgi.py
-│   ├── wsgi.py
-│   └── __init__.py
-├── apps/
-│   ├── __init__.py
-│   └── recruitment/
-│       ├── migrations/
-│       │   └── __init__.py
-│       ├── services/
-│       │   └── __init__.py
-│       ├── utils/
-│       │   └── __init__.py
-│       ├── tests/
-│       │   └── __init__.py
-│       ├── admin.py
-│       ├── apps.py
-│       ├── models.py
-│       ├── serializers.py
-│       ├── views.py
-│       ├── urls.py
-│       └── __init__.py
-├── media/
-├── static/
-└── templates/
+### Frontend
+
+| Technology | Purpose |
+|------------|---------|
+| Next.js 15 | React framework |
+| TypeScript | Type safety |
+| Tailwind CSS | Styling |
+| Axios | HTTP client |
+| React Query | Data fetching |
+| Lucide Icons | UI icons |
+
+## Architecture
+
 ```
+Client (Next.js)  -->  Django REST API  -->  PostgreSQL
+                            |
+                     AI Router (Hybrid)
+                      /            \
+               Groq AI           Gemini AI
+          (Primary LLM)       (Fallback LLM)
+                            |
+                    Event Bus / Orchestrator
+                   /        |         \
+           Job Agent  Candidate Agent  Ranking Agent
+```
+
+### Hybrid Scoring Formula
+
+```
+Final Score = (Deterministic Score x 75%) + (LLM Score x 25%)
+```
+
+- **Deterministic**: Skill matching, experience comparison, education check
+- **LLM**: Semantic analysis via Groq/Gemini for nuanced scoring
+- **Fallback**: Local heuristics if both AI providers fail
 
 ## Installation
 
-### 1. Create and activate a virtual environment
+### Prerequisites
+
+- Python 3.12+
+- PostgreSQL
+- Node.js 18+
+
+### 1. Clone and set up the backend
 
 ```powershell
+git clone https://github.com/NomanWahdat/ai_recruitment_system.git
+cd ai_recruitment_system
+
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-```
-
-### 2. Install dependencies
-
-```powershell
 pip install -r requirements.txt
+python -m spacy download en_core_web_sm
 ```
 
-### 3. Create environment file
-
-Copy `.env.example` to `.env` and fill in your values.
+### 2. Create environment file
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-Example `.env` values:
+Edit `.env` with your values:
 
 ```env
-SECRET_KEY=replace-with-a-secure-secret-key
+SECRET_KEY=your-secret-key-here
 DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1
 
 DB_NAME=ai_recruitment_system
 DB_USER=postgres
@@ -105,295 +140,165 @@ DB_PASSWORD=your_postgres_password
 DB_HOST=localhost
 DB_PORT=5432
 
-ALLOWED_HOSTS=localhost,127.0.0.1
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
 
-OPENAI_API_KEY=
+# AI Providers
+GROQ_API_KEY=your_groq_api_key
+GROQ_API_URL=https://api.groq.com/openai/v1
+GROQ_MODEL=llama-3.3-70b-versatile
+
+GEMINI_API_KEY=your_gemini_api_key
+GEMINI_API_URL=https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent
+GEMINI_MODEL=gemini-pro
+
+# Feature Flags
+USE_GROQ_AI=true
+USE_GEMINI_FALLBACK=true
+USE_LLM_FOR_SCORING=true
+
+# Hybrid Scoring Weights
+SKILL_WEIGHT=0.5
+EXPERIENCE_WEIGHT=0.3
+EDUCATION_WEIGHT=0.2
+LLM_SCORE_WEIGHT=0.25
 ```
 
-## PostgreSQL Setup
-
-Open PostgreSQL shell or pgAdmin and create the database:
+### 3. PostgreSQL setup
 
 ```sql
 CREATE DATABASE ai_recruitment_system;
 ```
 
-If needed, create a dedicated user:
-
-```sql
-CREATE USER ai_recruitment_user WITH PASSWORD 'strong_password';
-ALTER ROLE ai_recruitment_user SET client_encoding TO 'utf8';
-ALTER ROLE ai_recruitment_user SET default_transaction_isolation TO 'read committed';
-ALTER ROLE ai_recruitment_user SET timezone TO 'UTC';
-GRANT ALL PRIVILEGES ON DATABASE ai_recruitment_system TO ai_recruitment_user;
-```
-
-Then update `.env`:
-
-```env
-DB_NAME=ai_recruitment_system
-DB_USER=ai_recruitment_user
-DB_PASSWORD=strong_password
-DB_HOST=localhost
-DB_PORT=5432
-```
-
-## Database Migrations
+### 4. Run migrations and start backend
 
 ```powershell
 python manage.py makemigrations
 python manage.py migrate
-```
-
-## Create Superuser
-
-```powershell
 python manage.py createsuperuser
-```
-
-## Run Development Server
-
-```powershell
 python manage.py runserver
 ```
 
-The API will be available at:
+### 5. Set up and start frontend
 
-```text
-http://127.0.0.1:8000/api/health/
+```powershell
+cd frontend
+npm install
+npm run dev
 ```
+
+### 6. Access the application
+
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://127.0.0.1:8000/api/
+- **Admin Panel**: http://127.0.0.1:8000/admin/
 
 ## API Endpoints
 
-### Health Check
+### Authentication
 
-```http
-GET /api/health/
-```
-
-Response:
-
-```json
-{
-  "status": "ok",
-  "message": "AI Recruitment System API Running"
-}
-```
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/register/` | Register a new user |
+| POST | `/api/auth/login/` | Login and get token |
+| POST | `/api/auth/logout/` | Logout and delete token |
+| GET | `/api/auth/me/` | Get current user info |
 
 ### Jobs
 
-```http
-GET /api/jobs/
-POST /api/jobs/
-GET /api/jobs/{id}/
-PUT /api/jobs/{id}/
-DELETE /api/jobs/{id}/
-```
-
-Create job request:
-
-```json
-{
-  "title": "Backend Django Developer",
-  "company_name": "Acme Technologies",
-  "location": "Remote",
-  "employment_type": "full_time",
-  "description": "Build REST APIs and backend services using Django.",
-  "required_skills": ["Python", "Django", "REST API", "PostgreSQL"],
-  "minimum_experience": 3,
-  "education_requirement": "Bachelor's degree in Computer Science or equivalent",
-  "salary_range": "$60,000 - $90,000"
-}
-```
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/jobs/` | List all jobs |
+| POST | `/api/jobs/` | Create a job |
+| GET | `/api/jobs/{id}/` | Get job details |
+| PUT | `/api/jobs/{id}/` | Update a job |
+| DELETE | `/api/jobs/{id}/` | Delete a job |
+| GET | `/api/jobs/{id}/rankings/` | Get ranked candidates for a job |
 
 ### Candidates
 
-```http
-GET /api/candidates/
-POST /api/candidates/
-GET /api/candidates/{id}/
-PUT /api/candidates/{id}/
-DELETE /api/candidates/{id}/
-```
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/candidates/` | List all candidates |
+| POST | `/api/candidates/` | Create candidate (with CV upload) |
+| GET | `/api/candidates/{id}/` | Get candidate details |
+| PUT | `/api/candidates/{id}/` | Update candidate |
+| DELETE | `/api/candidates/{id}/` | Delete candidate |
+| POST | `/api/candidates/bulk-upload/` | Bulk upload CVs |
 
-Candidate CV uploads must use `multipart/form-data`.
+### AI-Powered Endpoints
 
-Allowed file types:
-
-- PDF
-- DOCX
-
-Maximum file size:
-
-- 10MB
-
-Create candidate request:
-
-```http
-POST /api/candidates/
-Content-Type: multipart/form-data
-```
-
-Form fields:
-
-```text
-full_name=Sarah Khan
-email=sarah@example.com
-phone_number=+1234567890
-cv_file=@sarah_cv.pdf
-years_of_experience=4.5
-skills=["Python", "Django", "PostgreSQL"]
-education=BS Computer Science
-linkedin_url=https://www.linkedin.com/in/example
-github_url=https://github.com/example
-portfolio_url=https://example.com
-```
-
-### Bulk Candidate CV Upload
-
-```http
-POST /api/candidates/bulk-upload/
-Content-Type: multipart/form-data
-```
-
-Use the form field name `files` for each uploaded CV.
-
-Example `curl` request:
-
-```bash
-curl -X POST http://127.0.0.1:8000/api/candidates/bulk-upload/ \
-  -F "files=@john_cv.pdf" \
-  -F "files=@sarah_cv.docx"
-```
-
-Successful or partially successful response:
-
-```json
-{
-  "success_count": 1,
-  "failed_count": 1,
-  "results": [
-    {
-      "filename": "john_cv.pdf",
-      "status": "completed",
-      "candidate_id": 1
-    },
-    {
-      "filename": "broken.pdf",
-      "status": "failed",
-      "candidate_id": 2,
-      "error": "Unable to read PDF file."
-    }
-  ]
-}
-```
-
-Invalid upload response:
-
-```json
-{
-  "files": {
-    "0": [
-      "Only PDF and DOCX files are allowed."
-    ]
-  }
-}
-```
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/ai/parse-job/` | AI-powered job description parsing |
+| POST | `/api/ai/match-explain/` | AI match explanation |
+| POST | `/api/ai/interview-questions/` | AI interview question generation |
 
 ### Analyses
 
-```http
-GET /api/analyses/
-POST /api/analyses/
-GET /api/analyses/{id}/
-PUT /api/analyses/{id}/
-DELETE /api/analyses/{id}/
-```
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/analyses/` | List all analyses |
+| POST | `/api/analyses/` | Create analysis |
+| GET | `/api/analyses/{id}/` | Get analysis details |
 
-Create analysis request:
+### System
 
-```json
-{
-  "job": 1,
-  "candidate": 1,
-  "match_score": 87,
-  "matched_skills": ["Python", "Django", "REST API"],
-  "missing_skills": ["AWS"],
-  "strengths": "Strong backend development and API experience.",
-  "weaknesses": "Limited cloud platform exposure.",
-  "ai_summary": "Candidate is a strong match for the Django backend role.",
-  "recommendation_status": "shortlisted",
-  "generated_interview_questions": [
-    "Explain Django REST Framework serializers.",
-    "How do you optimize slow API endpoints?"
-  ]
-}
-```
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/health/` | Health check |
 
-## Settings Modules
+## Testing
 
-Development uses:
-
-```text
-config.settings.development
-```
-
-Production uses:
-
-```text
-config.settings.production
-```
-
-For production deployments, set the environment variable:
+Run all backend tests:
 
 ```powershell
-$env:DJANGO_SETTINGS_MODULE="config.settings.production"
+python manage.py test --settings=config.settings.test
 ```
 
-## Next Implementation Steps
+Tests cover:
+- **Model tests** - Job, Candidate model creation and validation
+- **Auth tests** - Registration, login, logout, token management
+- **API tests** - CRUD operations for jobs, candidates, rankings
 
-The next phase should add CV text extraction for uploaded PDF and DOCX files, then store the extracted text on candidate records for AI analysis.
+## Project Structure
 
-## Demo
-
-Preview screenshots are available in the repository under `media/demo`:
-
-- Sign in page: [media/demo/signin.png](media/demo/signin.png)
-- Sign up page: [media/demo/signup.png](media/demo/signup.png)
-- Dashboard: [media/demo/dashboard.png](media/demo/dashboard.png)
-- Candidates list: [media/demo/candidates.png](media/demo/candidates.png)
-- Candidate detail: [media/demo/candidate_detail.png](media/demo/candidate_detail.png)
-- Jobs list: [media/demo/jobs.png](media/demo/jobs.png)
-- Job detail: [media/demo/job_detail.png](media/demo/job_detail.png)
-- Rankings: [media/demo/rankings.png](media/demo/rankings.png)
-- AI tools: [media/demo/ai_tools.png](media/demo/ai_tools.png)
-- Automation: [media/demo/automation.png](media/demo/automation.png)
-
-You can open these files directly in the project or view them in your code editor to get quick visual references for the main pages.
-
-## Connect & Push to GitHub
-
-If you created a new GitHub repository (for example `https://github.com/NomanWahdat/ai_recruitment_system.git`), run the following locally from the project root to push the code:
-
-```bash
-git init
-git add .
-git commit -m "initial commit"
-git branch -M main
-git remote add origin https://github.com/NomanWahdat/ai_recruitment_system.git
-git push -u origin main
+```
+ai_recruitment_system/
+├── config/                    # Django settings and URL config
+│   ├── settings/
+│   │   ├── base.py            # Shared settings
+│   │   ├── development.py     # Dev settings (DEBUG=True)
+│   │   ├── production.py      # Production settings
+│   │   └── test.py            # Test settings (no AI calls)
+│   └── urls.py
+├── apps/recruitment/          # Main application
+│   ├── services/
+│   │   ├── ai/                # AI providers (Groq, Gemini, Router)
+│   │   ├── automation/        # Event bus, orchestrator, agents
+│   │   ├── matching/          # Hybrid matcher, scorer, skill matcher
+│   │   └── candidate_processor.py
+│   ├── tests/                 # Test suite
+│   ├── auth_views.py          # Authentication API views
+│   ├── models.py              # Job, Candidate, Analysis models
+│   ├── serializers.py         # DRF serializers
+│   └── views.py               # API views
+├── frontend/                  # Next.js application
+│   ├── app/                   # Pages and layouts
+│   ├── components/            # UI components
+│   │   ├── auth/              # Sign in/up forms
+│   │   └── layout/            # Sidebar, Topbar, AuthGate
+│   ├── contexts/              # AuthContext
+│   ├── services/              # API service layer
+│   └── lib/                   # Axios config
+├── media/demo/                # Demo screenshots
+└── requirements.txt
 ```
 
-If you already ran `git init` and committed only the `README.md`, replace `git add .` with `git add README.md` as appropriate.
+## License
 
-## Deployment links
-
-After deploying the backend (Railway / Render) and frontend (Vercel), add the live URLs here to make them easy for consumers to find.
-
-Example placement:
-
-- Frontend (Vercel): https://your-app.vercel.app
-- Backend (Railway/Render): https://your-backend.up.railway.app
+This project is for educational and portfolio purposes.
 
 ---
+
+**Built by [Noman Wahdat](https://github.com/NomanWahdat)**
 

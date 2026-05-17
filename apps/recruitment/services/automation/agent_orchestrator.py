@@ -1,5 +1,6 @@
 import logging
 from typing import Dict, Any
+from django.conf import settings
 
 from .event_bus import event_bus
 from .candidate_agent import candidate_agent
@@ -7,6 +8,11 @@ from .job_agent import job_agent
 from .ranking_agent import ranking_agent
 
 logger = logging.getLogger(__name__)
+
+
+def is_automation_enabled():
+    """Check if automation is enabled (can be disabled in tests)."""
+    return getattr(settings, "AUTOMATION_ENABLED", True)
 
 
 class AgentOrchestrator:
@@ -26,6 +32,9 @@ class AgentOrchestrator:
         self._wired = True
 
     def emit(self, event_type: str, payload: Dict[str, Any]):
+        if not is_automation_enabled():
+            logger.debug("Automation disabled, skipping event=%s", event_type)
+            return {"skipped": True, "reason": "automation_disabled"}
         logger.info("Emitting event=%s payload_keys=%s", event_type, list((payload or {}).keys()))
         return event_bus.emit(event_type, payload or {})
 

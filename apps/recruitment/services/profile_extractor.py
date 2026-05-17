@@ -1,5 +1,3 @@
-import spacy
-
 from apps.recruitment.services.education_extractor import EducationExtractor
 from apps.recruitment.services.entity_parser import EntityParser
 from apps.recruitment.services.experience_extractor import ExperienceExtractor
@@ -9,6 +7,15 @@ from decimal import Decimal
 import logging
 
 logger = logging.getLogger(__name__)
+
+# Try to import spacy, but provide fallback if not available
+try:
+    import spacy
+    SPACY_AVAILABLE = True
+except ImportError:
+    SPACY_AVAILABLE = False
+    spacy = None
+    logger.warning("spaCy not installed. NLP features will use fallback methods.")
 
 
 class ProfileExtractor:
@@ -85,7 +92,11 @@ class ProfileExtractor:
         return extracted
 
     def _load_nlp_model(self):
+        if not SPACY_AVAILABLE or spacy is None:
+            logger.warning("spaCy not available. Using fallback for NLP model.")
+            return None
         try:
             return spacy.load("en_core_web_sm")
         except OSError:
+            logger.warning("en_core_web_sm model not found. Using blank English model.")
             return spacy.blank("en")

@@ -7,8 +7,14 @@ venv/
 env/
 media/*
 !media/.gitkeep
+!media/demo/
+!media/demo/*
 staticfiles/
 *.log
 .DS_Store
 .vscode/
 .idea/
+frontend/.next/
+frontend/node_modules/
+node_modules/
+static/

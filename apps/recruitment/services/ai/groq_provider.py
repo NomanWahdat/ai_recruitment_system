@@ -23,17 +23,16 @@ class GroqProvider(AIProvider):
     def __init__(self):
         self.api_url = os.getenv("GROQ_API_URL") or config("GROQ_API_URL", default="")
         self.api_key = os.getenv("GROQ_API_KEY") or config("GROQ_API_KEY", default="")
-        self.model = os.getenv("GROQ_MODEL") or config("GROQ_MODEL", default="openai/gpt-oss-20b")
+        self.model = os.getenv("GROQ_MODEL") or config("GROQ_MODEL", default="llama-3.3-70b-versatile")
 
-    def _responses_url(self) -> str:
+    def _chat_completions_url(self) -> str:
         base_url = (self.api_url or "").rstrip("/")
         if not base_url:
             return ""
-        if "responses" in base_url:
-            return base_url
+        # Groq uses /chat/completions endpoint (OpenAI compatible)
         if base_url.endswith("/v1") or base_url.endswith("/v1/"):
-            return f"{base_url}/responses"
-        return f"{base_url}/responses"
+            return f"{base_url}/chat/completions"
+        return f"{base_url}/chat/completions"
 
     def _headers(self) -> Dict[str, str]:
         hdrs: Dict[str, str] = {"Content-Type": "application/json"}
@@ -72,14 +71,14 @@ class GroqProvider(AIProvider):
         return ""
 
     def generate_text(self, prompt: str, timeout: int = 10) -> str:
-        url = self._responses_url()
+        url = self._chat_completions_url()
         if not url:
             return (prompt or "").strip()[:1000]
 
         try:
             payload = {
                 "model": self.model,
-                "input": prompt,
+                "messages": [{"role": "user", "content": prompt}],
                 "temperature": 0,
             }
             resp = requests.post(url, json=payload, headers=self._headers(), timeout=timeout)
@@ -90,18 +89,23 @@ class GroqProvider(AIProvider):
                 return resp.text or ""
 
             if isinstance(data, dict):
-                # Groq Responses API: extract from output[].content[].text
-                extracted = self._extract_text_from_responses_api(data)
-                if extracted:
-                    return extracted
-
-                # Legacy/fallback field checks
-                if "output" in data and isinstance(data["output"], str):
-                    return data["output"]
+                # OpenAI/Groq Chat Completions API format
                 if "choices" in data and isinstance(data["choices"], list) and data["choices"]:
                     first = data["choices"][0]
-                    if isinstance(first, dict) and "text" in first:
-                        return first["text"]
+                    if isinstance(first, dict):
+                        # Check for message.content (OpenAI format)
+                        message = first.get("message")
+                        if isinstance(message, dict):
+                            content = message.get("content")
+                            if isinstance(content, str):
+                                return content
+                        # Legacy text field
+                        if "text" in first:
+                            return first["text"]
+
+                # Fallback: check for output_text
+                if "output_text" in data and isinstance(data["output_text"], str):
+                    return data["output_text"]
 
             return resp.text or ""
         except Exception as exc:
@@ -109,7 +113,7 @@ class GroqProvider(AIProvider):
             return ""
 
     def analyze_json(self, prompt: str, timeout: int = 10) -> Dict[str, Any]:
-        url = self._responses_url()
+        url = self._chat_completions_url()
         if not url:
             result: Dict[str, Any] = {}
             for line in (prompt or "").splitlines():
@@ -121,7 +125,7 @@ class GroqProvider(AIProvider):
         try:
             payload = {
                 "model": self.model,
-                "input": prompt,
+                "messages": [{"role": "user", "content": prompt}],
                 "temperature": 0,
             }
             resp = requests.post(url, json=payload, headers=self._headers(), timeout=timeout)
@@ -129,15 +133,30 @@ class GroqProvider(AIProvider):
             try:
                 data = resp.json()
                 if isinstance(data, dict):
-                    # Extract text from the Responses API structure
-                    extracted = self._extract_text_from_responses_api(data)
-                    if extracted:
-                        try:
-                            parsed = json.loads(extracted)
-                            if isinstance(parsed, dict):
-                                return parsed
-                        except Exception:
-                            pass
+                    # Extract content from Chat Completions format
+                    if "choices" in data and isinstance(data["choices"], list) and data["choices"]:
+                        first = data["choices"][0]
+                        if isinstance(first, dict):
+                            message = first.get("message")
+                            if isinstance(message, dict):
+                                content = message.get("content", "")
+                                if isinstance(content, str) and content.strip():
+                                    try:
+                                        parsed = json.loads(content)
+                                        if isinstance(parsed, dict):
+                                            return parsed
+                                    except Exception:
+                                        pass
+                                    # Try to extract JSON from markdown code blocks
+                                    import re
+                                    json_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', content, re.DOTALL)
+                                    if json_match:
+                                        try:
+                                            parsed = json.loads(json_match.group(1))
+                                            if isinstance(parsed, dict):
+                                                return parsed
+                                        except Exception:
+                                            pass
                     # Fallback: check top-level output_text
                     output_text = data.get("output_text")
                     if isinstance(output_text, str) and output_text.strip():
@@ -177,7 +196,7 @@ class GroqProvider(AIProvider):
 
         Returns empty dict on failure.
         """
-        if not self._responses_url():
+        if not self._chat_completions_url():
             return {}
 
         # Construct a concise prompt asking for strict JSON output

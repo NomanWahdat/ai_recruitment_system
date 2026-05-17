@@ -93,7 +93,8 @@ def _compute_deterministic_match(candidate: Candidate, job: Job) -> Dict[str, An
 
 
 def _compute_llm_match(candidate: Candidate, job: Job) -> Dict[str, Any]:
-    if not _is_enabled("USE_LLM_FOR_SCORING"):
+    # Enable LLM scoring if USE_LLM_FOR_SCORING is explicitly set, or if USE_GROQ_AI is enabled
+    if not (_is_enabled("USE_LLM_FOR_SCORING") or _is_enabled("USE_GROQ_AI")):
         return {}
 
     router = AIRouter()
