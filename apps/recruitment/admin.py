@@ -55,7 +55,6 @@ class JobAdmin(admin.ModelAdmin):
 
 @admin.register(Candidate)
 class CandidateAdmin(admin.ModelAdmin):
-    
     class AnalyzedFilter(admin.SimpleListFilter):
         title = "Analyzed"
         parameter_name = "analyzed"

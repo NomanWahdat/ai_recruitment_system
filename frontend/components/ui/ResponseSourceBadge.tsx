@@ -1,27 +1,18 @@
 "use client";
 
-interface ResponseSourceBadgeProps {
+export function ResponseSourceBadge({ source, model, reason }: {
   source: string | undefined | null;
-}
-
-export function ResponseSourceBadge({ source }: ResponseSourceBadgeProps) {
+  model?: string;
+  reason?: string;
+}) {
   if (!source) return null;
-
-  const isAI = source === "groq_ai";
-  const label = isAI ? "Groq AI Response" : "Local Response";
-
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
-        isAI
-          ? "bg-green-50 text-green-700 ring-1 ring-green-200"
-          : "bg-amber-50 text-amber-700 ring-1 ring-amber-200"
-      }`}
-    >
-      <span
-        className={`h-1.5 w-1.5 rounded-full ${isAI ? "bg-green-500" : "bg-amber-500"}`}
-      />
-      {label}
+  const label = source === "groq" ? "Groq AI" : source === "gemini" ? "Gemini AI" : "Local rubric";
+  return <div className="space-y-2">
+    <span className="inline-block rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-800">
+      {label}{model ? ` / ${model}` : ""}
     </span>
-  );
+    {source === "local" && <p className="text-xs leading-5 text-amber-800">
+      {reason || "Generated using local rules. This is not an AI response."}
+    </p>}
+  </div>;
 }

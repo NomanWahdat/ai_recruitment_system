@@ -1,0 +1,125 @@
+{
+  "dataset_version": "synthetic-v1",
+  "dataset_sha256": "eeb790f8bfc211e8044a3d1c89e8f6fe5b067a3a04afc84085128fe2b834406e",
+  "records": 12,
+  "python": "3.12.6",
+  "scoring_version": "rubric-v2",
+  "mode": "local regex/dictionary extraction; NLP model disabled; external providers disabled",
+  "email_accuracy": 1.0,
+  "experience_mae_years": 0.0,
+  "skill_precision": 1.0,
+  "skill_recall": 1.0,
+  "skill_f1": 1.0,
+  "ranking": {
+    "job_1": {
+      "rubric_ndcg_at_5": 0.984,
+      "exact_skill_ndcg_at_5": 1.0,
+      "tfidf_ndcg_at_5": 1.0,
+      "lsa_2d_ndcg_at_5": 0.6967
+    },
+    "job_2": {
+      "rubric_ndcg_at_5": 0.9735,
+      "exact_skill_ndcg_at_5": 0.994,
+      "tfidf_ndcg_at_5": 0.994,
+      "lsa_2d_ndcg_at_5": 0.2066
+    }
+  },
+  "identity_perturbation_score_unchanged": true,
+  "extraction_wall_seconds": 0.127547,
+  "ranking_wall_seconds": 0.03593,
+  "external_requests": 0,
+  "external_cost_usd": 0,
+  "independent_human_agreement": null,
+  "limitations": [
+    "Small synthetic regression corpus authored with the implementation; no independent held-out validation.",
+    "Relevance grades are developer judgments, not independent recruiter judgments.",
+    "Identity perturbation is one controlled check, not evidence of demographic fairness.",
+    "No live LLM quality, provider latency, OCR or multilingual benchmark."
+  ],
+  "cases": [
+    {
+      "id": "email-standard",
+      "email_correct": true,
+      "experience_absolute_error": 0.0,
+      "unexpected_skills": [],
+      "missing_skills": []
+    },
+    {
+      "id": "email-obfuscated",
+      "email_correct": true,
+      "experience_absolute_error": 0.0,
+      "unexpected_skills": [],
+      "missing_skills": []
+    },
+    {
+      "id": "overlapping-dates",
+      "email_correct": true,
+      "experience_absolute_error": 0.0,
+      "unexpected_skills": [],
+      "missing_skills": []
+    },
+    {
+      "id": "employment-gap",
+      "email_correct": true,
+      "experience_absolute_error": 0.0,
+      "unexpected_skills": [],
+      "missing_skills": []
+    },
+    {
+      "id": "education-not-work",
+      "email_correct": true,
+      "experience_absolute_error": 0.0,
+      "unexpected_skills": [],
+      "missing_skills": []
+    },
+    {
+      "id": "prompt-injection",
+      "email_correct": true,
+      "experience_absolute_error": 0.0,
+      "unexpected_skills": [],
+      "missing_skills": []
+    },
+    {
+      "id": "email-word-at",
+      "email_correct": true,
+      "experience_absolute_error": 0.0,
+      "unexpected_skills": [],
+      "missing_skills": []
+    },
+    {
+      "id": "parenthesized-email",
+      "email_correct": true,
+      "experience_absolute_error": 0.0,
+      "unexpected_skills": [],
+      "missing_skills": []
+    },
+    {
+      "id": "entry-level",
+      "email_correct": true,
+      "experience_absolute_error": 0.0,
+      "unexpected_skills": [],
+      "missing_skills": []
+    },
+    {
+      "id": "month-durations",
+      "email_correct": true,
+      "experience_absolute_error": 0.0,
+      "unexpected_skills": [],
+      "missing_skills": []
+    },
+    {
+      "id": "no-education",
+      "email_correct": true,
+      "experience_absolute_error": 0.0,
+      "unexpected_skills": [],
+      "missing_skills": []
+    },
+    {
+      "id": "spaced-email",
+      "email_correct": true,
+      "experience_absolute_error": 0.0,
+      "unexpected_skills": [],
+      "missing_skills": []
+    }
+  ]
+}

@@ -1,214 +1,142 @@
-from typing import Dict, Any, List
+from django.conf import settings
 from django.db import transaction
-from apps.recruitment.models import Job, Candidate, Analysis
+import math
+from apps.recruitment.models import Job, Candidate, Analysis, ScoreRun
+from apps.recruitment.services.ai.router import AIRouter, STATUS_MESSAGES
+from apps.recruitment.services.ai.contracts import prompt, PROMPT_VERSION
 from .skill_matcher import compare_skills
-from .scorer import compute_score
-import logging
-import os
-from decouple import config
-from apps.recruitment.services.ai.router import AIRouter
-
-logger = logging.getLogger(__name__)
+from .scorer import score_components, SCORING_VERSION
+from .audit import build_snapshot
 
 
-def _is_enabled(name: str, default: str = "false") -> bool:
-    value = os.getenv(name)
-    if value is None:
-        value = config(name, default=default)
-    return str(value).lower() in ("1", "true", "yes", "on")
-
-
-def _get_env(name: str, default: str) -> str:
-    value = os.getenv(name)
-    if value is None:
-        value = config(name, default=default)
-    return str(value)
-
-
-def _merge_skill_lists(base: List[str], extra: List[str]) -> List[str]:
-    merged: List[str] = []
-    seen = set()
-    for item in (base or []) + (extra or []):
-        normalized = str(item or "").strip()
-        lowered = normalized.lower()
-        if normalized and lowered not in seen:
-            seen.add(lowered)
-            merged.append(normalized)
-    return merged
-
-
-def _build_job_payload(job: Job) -> Dict[str, Any]:
-    return {
-        "title": job.title,
-        "required_skills": job.required_skills or [],
-        "description": job.description or "",
-        "minimum_experience": getattr(job, "minimum_experience", 0) or 0,
-        "education_requirement": getattr(job, "education_requirement", "") or "",
-    }
-
-
-def _build_candidate_payload(candidate: Candidate) -> Dict[str, Any]:
-    return {
-        "full_name": candidate.full_name,
-        "skills": candidate.skills or [],
-        "years_of_experience": float(candidate.years_of_experience or 0),
-        "education": candidate.education or "",
-        "text_snippet": (candidate.extracted_text or "")[:2000],
-    }
-
-
-def _compute_deterministic_match(candidate: Candidate, job: Job) -> Dict[str, Any]:
-    job_skills = job.required_skills or []
-    candidate_skills = candidate.skills or []
-
-    matched_skills, missing_skills = compare_skills(job_skills, candidate_skills)
-    total_required = len(job_skills) if job_skills else 0
-    matched_count = len(matched_skills)
-
-    years_required = getattr(job, "minimum_experience", 0) or 0
-    candidate_years = float(candidate.years_of_experience or 0)
-    job_text = f"{job.title} {job.description or ''}"
-
-    score = compute_score(
-        total_required=total_required,
-        matched_count=matched_count,
-        years_required=years_required,
-        candidate_years=candidate_years,
-        education=candidate.education or "",
-        job_text=job_text,
-        matched_skills=matched_skills,
-        missing_skills=missing_skills,
+def compute_hybrid_match(candidate, job):
+    matched, missing = compare_skills(job.required_skills, candidate.skills)
+    score, components, insufficient = score_components(
+        len(matched) + len(missing),
+        len(matched),
+        job.minimum_experience,
+        float(candidate.years_of_experience),
+        candidate.education,
+        job.education_requirement,
+        job.scoring_weights,
     )
-
-    experience_match = candidate_years >= years_required
-    education_match = bool(candidate.education and candidate.education.strip())
-
-    return {
-        "score": float(score),
-        "matched_skills": matched_skills,
-        "missing_skills": missing_skills,
-        "experience_match": experience_match,
-        "education_match": education_match,
-    }
-
-
-def _compute_llm_match(candidate: Candidate, job: Job) -> Dict[str, Any]:
-    # Enable LLM scoring if USE_LLM_FOR_SCORING is explicitly set, or if USE_GROQ_AI is enabled
-    if not (_is_enabled("USE_LLM_FOR_SCORING") or _is_enabled("USE_GROQ_AI")):
-        return {}
-
+    data = None
+    source = "local"
+    model = ""
     router = AIRouter()
-    job_payload = _build_job_payload(job)
-    candidate_payload = _build_candidate_payload(candidate)
-
-    timeout = int(_get_env("LLM_REQUEST_TIMEOUT", "10"))
-    providers = []
-    default_provider = router.get_provider()
-    providers.append(default_provider)
-    try:
-        fallback_provider = router.get_provider(prefer="gemini")
-        if fallback_provider.__class__ is not default_provider.__class__:
-            providers.append(fallback_provider)
-    except Exception:
-        pass
-
-    for provider in providers:
-        try:
-            llm_result = provider.score_candidate_job(job_payload, candidate_payload, timeout=timeout) or {}
-            if llm_result:
-                return llm_result
-        except Exception:
-            logger.exception("LLM scoring failed for job=%s candidate=%s", getattr(job, "id", "?"), getattr(candidate, "id", "?"))
-            continue
-    return {}
-
-
-def _merge_scores(deterministic: Dict[str, Any], llm_result: Dict[str, Any]) -> Dict[str, Any]:
-    score = float(deterministic.get("score", 0.0))
-    matched_skills = list(deterministic.get("matched_skills") or [])
-    missing_skills = list(deterministic.get("missing_skills") or [])
-
-    if not llm_result:
-        return {
-            **deterministic,
-            "score": score,
-            "matched_skills": matched_skills,
-            "missing_skills": missing_skills,
-            "llm_score": None,
-            "llm_explanation": "",
-        }
-
-    llm_score = llm_result.get("score")
-    try:
-        llm_score = float(llm_score) if llm_score is not None else None
-    except Exception:
-        llm_score = None
-
-    if llm_score is not None:
-        try:
-            weight = float(_get_env("LLM_SCORE_WEIGHT", "0.25"))
-        except Exception:
-            weight = 0.25
-        final_score = round(score * (1.0 - weight) + llm_score * weight, 2)
-    else:
-        final_score = score
-
-    return {
-        **deterministic,
-        "score": final_score,
-        "llm_score": llm_score,
-        "matched_skills": _merge_skill_lists(matched_skills, llm_result.get("matched_skills") or []),
-        "missing_skills": _merge_skill_lists(missing_skills, llm_result.get("missing_skills") or []),
-        "llm_explanation": str(llm_result.get("explanation") or ""),
-    }
-
-
-def compute_hybrid_match(candidate: Candidate, job: Job) -> Dict[str, Any]:
-    deterministic = _compute_deterministic_match(candidate, job)
-    llm_result = _compute_llm_match(candidate, job)
-    return _merge_scores(deterministic, llm_result)
-
-
-def match_candidate_to_job(candidate: Candidate, job: Job) -> Dict[str, Any]:
-    """Compute match between a candidate and job and persist Analysis record."""
-    hybrid_result = compute_hybrid_match(candidate, job)
-    score = hybrid_result["score"]
-    matched_skills = hybrid_result["matched_skills"]
-    missing_skills = hybrid_result["missing_skills"]
-    experience_match = hybrid_result["experience_match"]
-    education_match = hybrid_result["education_match"]
-
-    # Persist Analysis (create or update)
-    try:
-        with transaction.atomic():
-            analysis, created = Analysis.objects.get_or_create(job=job, candidate=candidate, defaults={
-                "match_score": score,
-                "matched_skills": matched_skills,
-                "missing_skills": missing_skills,
-                "strengths": "",
-                "weaknesses": "",
-                "ai_summary": hybrid_result.get("llm_explanation", ""),
-            })
-            if not created:
-                analysis.match_score = score
-                analysis.matched_skills = matched_skills
-                analysis.missing_skills = missing_skills
-                if hybrid_result.get("llm_explanation"):
-                    analysis.ai_summary = hybrid_result.get("llm_explanation", "")
-                analysis.save(update_fields=["match_score", "matched_skills", "missing_skills", "ai_summary", "updated_at"])
-    except Exception as exc:
-        logger.exception("Failed to persist analysis for job=%s candidate=%s: %s", job.id, candidate.id, exc)
-
+    if settings.USE_LLM_FOR_SCORING and not insufficient:
+        # Do not transmit names, contact details or raw resumes.
+        data, source, model = router.generate_json(
+            prompt(
+                "Return score (number 0-100), matched_skills (strings), missing_skills (strings), explanation (string).",
+                {
+                    "job": {
+                        "skills": job.required_skills,
+                        "years": job.minimum_experience,
+                        "education": job.education_requirement,
+                    },
+                    "candidate": {
+                        "skills": candidate.skills,
+                        "years": float(candidate.years_of_experience),
+                        "education": candidate.education,
+                    },
+                },
+            ),
+            "score",
+        )
+    metadata = router.metadata(source)
+    if insufficient or not settings.USE_LLM_FOR_SCORING:
+        metadata["fallback_reason"] = STATUS_MESSAGES[
+            "insufficient_requirements" if insufficient else "scoring_disabled"
+        ]
+    requested_weight = settings.LLM_SCORE_WEIGHT
+    if not math.isfinite(requested_weight):
+        raise ValueError("LLM_SCORE_WEIGHT must be finite.")
+    weight = max(0, min(1, requested_weight)) if data else 0
+    final = round(score * (1 - weight) + (data["score"] if data else 0) * weight, 2)
+    # Canonical skill evidence stays deterministic. AI cannot silently add/remove requirements.
     result = {
-        "job_id": job.id,
-        "candidate_id": candidate.id,
-        "match_score": score,
-        "matched_skills": matched_skills,
-        "missing_skills": missing_skills,
-        "experience_match": experience_match,
-        "education_match": education_match,
-        "llm_score": hybrid_result.get("llm_score"),
-        "llm_explanation": hybrid_result.get("llm_explanation", ""),
+        **metadata,
+        "score": final,
+        "deterministic_score": score,
+        "llm_score": data["score"] if data else None,
+        "matched_skills": matched,
+        "missing_skills": missing,
+        "score_components": components,
+        "insufficient_requirements": insufficient,
+        "provider": source,
+        "provider_model": model,
+        "llm_explanation": data.get("explanation", "") if data else "",
+        "prompt_version": PROMPT_VERSION,
+        "experience_match": float(candidate.years_of_experience) >= job.minimum_experience,
+        "education_match": components["education"]["ratio"] == 1,
+    }
+    result["scoring_snapshot"] = build_snapshot(candidate, job, result, requested_weight, weight)
+    return result
+
+
+def refresh_positions(job_id):
+    analyses = list(
+        Analysis.objects.filter(
+            job_id=job_id, is_stale=False, insufficient_requirements=False
+        ).order_by("-match_score", "candidate_id", "id")
+    )
+    for position, analysis in enumerate(analyses, 1):
+        analysis.ranking_position = position
+    if analyses:
+        Analysis.objects.bulk_update(analyses, ["ranking_position"])
+
+
+@transaction.atomic
+def match_candidate_to_job(candidate, job):
+    if candidate.owner_id is None or candidate.owner_id != job.owner_id:
+        raise ValueError("Candidate and job must belong to the same recruiter.")
+    # Lock in candidate -> job order, including concurrent profile/job edits.
+    candidate = Candidate.objects.select_for_update().get(pk=candidate.pk)
+    job = Job.objects.select_for_update().get(pk=job.pk)
+    result = compute_hybrid_match(candidate, job)
+    analysis, _ = Analysis.objects.update_or_create(
+        job=job,
+        candidate=candidate,
+        defaults={
+            "match_score": result["score"],
+            "scoring_snapshot": result["scoring_snapshot"],
+            "matched_skills": result["matched_skills"],
+            "missing_skills": result["missing_skills"],
+            "insufficient_requirements": result["insufficient_requirements"],
+            "score_components": result["score_components"],
+            "scoring_version": SCORING_VERSION,
+            "provider": result["provider"],
+            "provider_model": result["provider_model"],
+            "prompt_version": PROMPT_VERSION,
+            "candidate_revision": candidate.revision,
+            "job_revision": job.revision,
+            "is_stale": False,
+            "ai_summary": result["llm_explanation"],
+            "strengths": "",
+            "weaknesses": "",
+            "generated_interview_questions": [],
+            "generation_provenance": {
+                "scoring": {
+                    "fallback_reason": result["fallback_reason"],
+                    "provider_attempts": result["provider_attempts"],
+                }
+            },
+        },
+    )
+    score_run = ScoreRun.objects.create(analysis=analysis, snapshot=result["scoring_snapshot"])
+    refresh_positions(job.pk)
+    return {
+        **result,
+        "match_score": analysis.match_score,
+        "analysis_id": analysis.pk,
+        "score_run_id": score_run.pk,
+        "candidate_id": candidate.pk,
+        "job_id": job.pk,
+        "response_source": result["provider"],
     }
 
-    return result
+
+def _merge_scores(deterministic, llm_result):
+    # Backwards-compatible helper: keep skill evidence disjoint.
+    return {**deterministic, "llm_score": llm_result.get("score") if llm_result else None}

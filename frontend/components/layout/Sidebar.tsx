@@ -9,6 +9,7 @@ const navigation = [
   { label: "Candidates", href: "/candidates", icon: Users },
   { label: "Jobs", href: "/jobs", icon: BriefcaseBusiness },
   { label: "Rankings", href: "/rankings", icon: BarChart3 },
+  { label: "Evaluation", href: "/evaluation", icon: BarChart3 },
   { label: "AI Tools", href: "/ai-tools", icon: Wand2 },
   { label: "Automation", href: "/automation", icon: Bot },
 ];
@@ -49,7 +50,7 @@ export function Sidebar() {
 
       <div className="mt-auto rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50 p-4 shadow-sm">
         <div className="text-sm font-semibold text-slate-900">System Status</div>
-        <p className="mt-1 text-sm text-slate-600">Frontend scaffold ready for API integration.</p>
+        <p className="mt-1 text-sm text-slate-600">Private recruiter workspace. Review evidence before decisions.</p>
       </div>
     </aside>
   );

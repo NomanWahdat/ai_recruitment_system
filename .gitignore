@@ -17,4 +17,9 @@ staticfiles/
 frontend/.next/
 frontend/node_modules/
 node_modules/
+.runtime/
+frontend/.runtime/
+*.tsbuildinfo
+coverage.xml
+.coverage
 static/

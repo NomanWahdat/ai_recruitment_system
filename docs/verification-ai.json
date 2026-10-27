@@ -1,0 +1,70 @@
+{
+  "provider_configuration": {
+    "available": false,
+    "verified": false,
+    "providers": [
+      {
+        "provider": "groq",
+        "model": "llama-3.3-70b-versatile",
+        "enabled": true,
+        "status": "missing_key",
+        "message": "No API key is configured."
+      },
+      {
+        "provider": "gemini",
+        "model": "gemini-3.5-flash-lite",
+        "enabled": true,
+        "status": "missing_key",
+        "message": "No API key is configured."
+      }
+    ],
+    "scoring_enabled": true,
+    "message": "Configuration only; a successful connection test verifies provider access."
+  },
+  "connection_test": {
+    "ok": false,
+    "model": "",
+    "response_source": "local",
+    "fallback_used": true,
+    "fallback_reason": "Groq: No API key is configured.; Gemini: No API key is configured.",
+    "provider_attempts": [
+      {
+        "provider": "groq",
+        "status": "missing_key",
+        "message": "No API key is configured."
+      },
+      {
+        "provider": "gemini",
+        "status": "missing_key",
+        "message": "No API key is configured."
+      }
+    ]
+  },
+  "parse_metadata": {
+    "response_source": "local",
+    "fallback_used": true,
+    "fallback_reason": "Groq: No API key is configured.; Gemini: No API key is configured.",
+    "provider_attempts": [
+      {
+        "provider": "groq",
+        "status": "missing_key",
+        "message": "No API key is configured."
+      },
+      {
+        "provider": "gemini",
+        "status": "missing_key",
+        "message": "No API key is configured."
+      }
+    ]
+  },
+  "checked_at_utc": "2026-10-26T22:22:07.807005+00:00",
+  "postgres_tests": {
+    "passed": 89,
+    "skipped": 0
+  },
+  "targeted_sqlite_tests_passed": 68,
+  "backend_statement_coverage_percent": 85.78,
+  "live_provider_success": false,
+  "live_provider_limitation": "At this initial phase, no API key was configured. Later live Groq checks passed; see verification-ai-live.json.",
+  "phase": "Initial missing-key/fallback verification; resolved after the user supplied a key. See verification-ai-live.json."
+}

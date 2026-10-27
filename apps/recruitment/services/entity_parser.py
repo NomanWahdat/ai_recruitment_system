@@ -17,8 +17,8 @@ class EntityParser:
 
         cleaned = text
         # common obfuscations: 'name [at] domain.com', 'name (at) domain dot com'
-        cleaned = re.sub(r"\s*\[?\(?at\)?\]?\s*", "@", cleaned, flags=re.IGNORECASE)
-        cleaned = re.sub(r"\s*\[?\(?dot\)?\]?\s*", ".", cleaned, flags=re.IGNORECASE)
+        cleaned = re.sub(r"\s*(?:\[at\]|\(at\)|\s+at\s+)\s*", "@", cleaned, flags=re.IGNORECASE)
+        cleaned = re.sub(r"\s*(?:\[dot\]|\(dot\)|\s+dot\s+)\s*", ".", cleaned, flags=re.IGNORECASE)
         # remove spaces in common email fragments like 'name @ domain . com'
         cleaned = re.sub(r"\s*@\s*", "@", cleaned)
         cleaned = re.sub(r"\s*\.\s*", ".", cleaned)
@@ -34,7 +34,7 @@ class EntityParser:
             try:
                 for match in phonenumbers.PhoneNumberMatcher(text, region):
                     number = match.number
-                    if phonenumbers.is_possible_number(number):
+                    if phonenumbers.is_valid_number(number):
                         return phonenumbers.format_number(
                             number,
                             phonenumbers.PhoneNumberFormat.INTERNATIONAL,
@@ -42,8 +42,7 @@ class EntityParser:
             except Exception:
                 continue
 
-        fallback = re.search(r"(?:\+?\d[\d\s().-]{7,}\d)", text)
-        return clean_entity(fallback.group(0)) if fallback else ""
+        return ""
 
     def extract_urls(self, text):
         urls = [normalize_url(url) for url in self.url_pattern.findall(text or "")]
@@ -105,4 +104,4 @@ class EntityParser:
         parts = value.split()
         if not 2 <= len(parts) <= 4:
             return False
-        return all(part.replace("-", "").isalpha() for part in parts)
+        return all(part.strip(".").replace("-", "").replace("'", "").isalpha() for part in parts)

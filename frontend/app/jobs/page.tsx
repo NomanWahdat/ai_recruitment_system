@@ -4,14 +4,15 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createJob, deleteJob, getJobs } from "@/services/jobService";
+import { createJob, deleteJob, listJobs } from "@/services/jobService";
+import { ResponseSourceBadge } from "@/components/ui/ResponseSourceBadge";
 import { parseJob } from "@/services/aiService";
 import { JobCard } from "@/components/ui/JobCard";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { Modal } from "@/components/ui/Modal";
 import { useToast } from "@/components/ui/Toast";
 
-const PAGE_SIZE = 6;
+const PAGE_SIZE = 20;
 
 function normalizeSkills(value: string) {
   return value
@@ -37,7 +38,7 @@ export default function JobsPage() {
     education_requirement: "",
   });
 
-  const jobsQuery = useQuery({ queryKey: ["jobs"], queryFn: getJobs });
+  const jobsQuery = useQuery({ queryKey: ["jobs", page, search], queryFn: () => listJobs({page, search}) });
 
   const createMutation = useMutation({
     mutationFn: createJob,
@@ -51,7 +52,6 @@ export default function JobsPage() {
       let message = "Unable to create job.";
       try {
         // Axios error with response body will contain validation details
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const err: any = error;
         if (err?.response?.data) {
           const data = err.response.data;
@@ -81,23 +81,17 @@ export default function JobsPage() {
     mutationFn: parseJob,
     onSuccess: (data) => {
       setParsedJob(data);
-      pushToast({ title: "Job parsed", description: "AI job insights generated.", type: "success" });
+      pushToast({ title: "Job parsed", description: data.response_source === "local" ? "Job parsed using local rules." : "AI job insights generated.", type: "success" });
     },
     onError: (error: unknown) => pushToast({ title: "Parse failed", description: error instanceof Error ? error.message : "Unable to parse job.", type: "error" }),
   });
 
-  const jobs = Array.isArray(jobsQuery.data) ? jobsQuery.data : [];
+  const jobs = jobsQuery.data?.results || [];
 
-  const filteredJobs = useMemo(() => {
-    return jobs.filter((job: any) => {
-      const text = `${job.title || ""} ${job.company_name || ""} ${(job.required_skills || []).join(" ")}`.toLowerCase();
-      return text.includes(search.toLowerCase());
-    });
-  }, [jobs, search]);
-
-  const totalPages = Math.max(1, Math.ceil(filteredJobs.length / PAGE_SIZE));
-  const currentPage = Math.min(page, totalPages);
-  const pagedJobs = filteredJobs.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const filteredJobs = jobs;
+  const totalPages = Math.max(1, Math.ceil((jobsQuery.data?.count || 0) / PAGE_SIZE));
+  const currentPage = page;
+  const pagedJobs = jobs;
 
   const onSubmitCreate = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -109,6 +103,7 @@ export default function JobsPage() {
   };
 
   if (jobsQuery.isLoading) return <LoadingSpinner />;
+  if (jobsQuery.isError) return <p role="alert">Unable to load jobs. Check the API connection.</p>;
 
   return (
     <div className="space-y-6">
@@ -125,11 +120,11 @@ export default function JobsPage() {
       <div className="grid gap-4 md:grid-cols-3">
         <label className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-soft md:col-span-2">
           <div className="text-xs uppercase tracking-[0.2em] text-slate-400">Search</div>
-          <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Title, company, skills" className="mt-2 w-full bg-transparent text-sm outline-none" />
+          <input value={search} onChange={(event) => {setSearch(event.target.value);setPage(1);}} placeholder="Title, company, skills" className="mt-2 w-full bg-transparent text-sm outline-none" />
         </label>
         <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 shadow-soft">
           <div className="text-xs uppercase tracking-[0.2em] text-slate-400">Results</div>
-          <div className="mt-2 font-semibold text-slate-950">{filteredJobs.length} jobs</div>
+          <div className="mt-2 font-semibold text-slate-950">{jobsQuery.data?.count || 0} jobs</div>
         </div>
       </div>
 
@@ -150,7 +145,7 @@ export default function JobsPage() {
                   <Link href={`/jobs/${job.id}`} className="rounded-2xl bg-slate-100 px-3 py-2 text-xs font-medium text-slate-700">View details</Link>
                   <Link href={`/rankings?job=${job.id}`} className="rounded-2xl bg-blue-50 px-3 py-2 text-xs font-medium text-blue-700">View rankings</Link>
                   <button onClick={() => parseMutation.mutate(job.description || "")} className="rounded-2xl bg-white px-3 py-2 text-xs font-medium text-slate-700 ring-1 ring-slate-200">Parse using AI</button>
-                  <button onClick={() => deleteMutation.mutate(job.id)} className="rounded-2xl bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700">Delete</button>
+                  <button onClick={() => { if(window.confirm("Delete this job and its applications and analyses?")) deleteMutation.mutate(job.id); }} className="rounded-2xl bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700">Delete</button>
                 </>
               }
             />
@@ -159,8 +154,9 @@ export default function JobsPage() {
 
         <div className="space-y-6">
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">
-            <div className="text-lg font-semibold text-slate-950">AI Parsed Insights</div>
-            <pre className="mt-4 overflow-auto rounded-2xl bg-slate-50 p-4 text-xs leading-6 text-slate-600">{parsedJob ? JSON.stringify(parsedJob, null, 2) : "Parse a job to see AI insights here."}</pre>
+            <div className="text-lg font-semibold text-slate-950">Parsed job insights</div>
+            {parsedJob && <div className="mt-3"><ResponseSourceBadge source={parsedJob.response_source} model={parsedJob.model} reason={parsedJob.fallback_reason} /></div>}
+            <pre className="mt-4 overflow-auto rounded-2xl bg-slate-50 p-4 text-xs leading-6 text-slate-600">{parsedJob ? JSON.stringify({ skills: parsedJob.skills, role_type: parsedJob.role_type, experience_level: parsedJob.experience_level, summary: parsedJob.summary }, null, 2) : "Parse a job to see its requirements here."}</pre>
           </section>
 
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">

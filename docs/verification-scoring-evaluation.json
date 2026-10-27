@@ -1,0 +1,45 @@
+{
+  "checked_on": "2026-10-27",
+  "timezone": "Asia/Kabul",
+  "generated_at_utc": "2026-10-27T16:08:33.507543+00:00",
+  "postgres_tests": {
+    "passed": 110,
+    "skipped": 0
+  },
+  "backend_statement_coverage_percent": 86.25,
+  "migration": "0009_reproducible_scoring applied; no pending model changes",
+  "checks": [
+    "ruff check",
+    "ruff format --check",
+    "frontend ESLint, zero warnings",
+    "TypeScript",
+    "production build",
+    "offline evaluation regression thresholds",
+    "focused real-browser feature flow and both downloads"
+  ],
+  "offline_evaluation": {
+    "records": 24,
+    "independent": false,
+    "skill_f1": 0.8571428571428571,
+    "experience_mae_years": 0.2708333333333333,
+    "provider_requests": 0
+  },
+  "live_evaluation_smoke": {
+    "records": 2,
+    "validated_ai_scores": 4,
+    "provider_requests": 4,
+    "quality_claim": false
+  },
+  "browser_report": "verification-scoring-evaluation-browser.json",
+  "screenshots": [
+    "13-accuracy-evaluation.png",
+    "14-reproducible-scoring.png"
+  ],
+  "limitations": [
+    "Synthetic developer-authored labels; independent accuracy not established.",
+    "Score verification replays saved arithmetic, not future AI generation.",
+    "SHA-256 is a corruption check, not a digital signature.",
+    "Legacy results require rematching to create snapshots.",
+    "Remote CI/container runtime remain unverified."
+  ]
+}

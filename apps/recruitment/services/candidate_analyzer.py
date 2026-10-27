@@ -37,7 +37,10 @@ class CandidateAnalyzer:
             try:
                 self._update_candidate(candidate, extracted_data)
             except Exception as exc:
-                logger.exception("Fallback candidate analysis update failed for id=%s", getattr(candidate, "id", "?"))
+                logger.exception(
+                    "Fallback candidate analysis update failed for id=%s",
+                    getattr(candidate, "id", "?"),
+                )
                 raise CandidateAnalysisError(str(exc)) from exc
 
             return {

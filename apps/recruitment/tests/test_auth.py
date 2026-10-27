@@ -1,5 +1,5 @@
 """Tests for authentication API."""
-from django.test import TestCase
+
 from django.contrib.auth.models import User
 from rest_framework.test import APITestCase
 from rest_framework import status
@@ -16,6 +16,7 @@ class AuthAPITests(APITestCase):
             "password": "testpass123",
             "full_name": "Test User",
         }
+        data["issue_token"] = True
         response = self.client.post("/api/auth/register/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertIn("token", response.data)
@@ -30,6 +31,7 @@ class AuthAPITests(APITestCase):
             "email": "new@example.com",
             "password": "testpass123",
         }
+        data["issue_token"] = True
         response = self.client.post("/api/auth/register/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
 
@@ -40,6 +42,7 @@ class AuthAPITests(APITestCase):
             "username": "logintest",
             "password": "mypassword",
         }
+        data["issue_token"] = True
         response = self.client.post("/api/auth/login/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("token", response.data)
@@ -52,6 +55,7 @@ class AuthAPITests(APITestCase):
             "username": "wrongpass",
             "password": "wrongpassword",
         }
+        data["issue_token"] = True
         response = self.client.post("/api/auth/login/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
@@ -59,6 +63,7 @@ class AuthAPITests(APITestCase):
         """Test /me endpoint returns user when authenticated."""
         user = User.objects.create_user(username="meuser", password="pass123")
         from rest_framework.authtoken.models import Token
+
         token, _ = Token.objects.get_or_create(user=user)
 
         self.client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
@@ -75,6 +80,7 @@ class AuthAPITests(APITestCase):
         """Test logout invalidates token."""
         user = User.objects.create_user(username="logoutuser", password="pass123")
         from rest_framework.authtoken.models import Token
+
         token, _ = Token.objects.get_or_create(user=user)
 
         self.client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")

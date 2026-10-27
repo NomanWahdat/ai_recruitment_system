@@ -40,9 +40,7 @@ SKILL_DICTIONARY = {
 class SkillExtractor:
     def __init__(self):
         self.skill_lookup = {
-            skill.lower(): skill
-            for skills in SKILL_DICTIONARY.values()
-            for skill in skills
+            skill.lower(): skill for skills in SKILL_DICTIONARY.values() for skill in skills
         }
 
     def extract(self, text, nlp=None):
@@ -110,11 +108,24 @@ class SkillExtractor:
                 in_skills = True
                 continue
 
-            if in_skills and (re.match(r"^[a-z ]{2,30}:$", lowered) or lowered in {
-                "education", "experience", "professional experience", "work experience",
-                "additional", "extracurricular", "certifications", "references",
-                "volunteer", "interests", "hobbies", "projects",
-            }):
+            if in_skills and (
+                re.match(r"^[a-z ]{2,30}:$", lowered)
+                or lowered
+                in {
+                    "education",
+                    "experience",
+                    "professional experience",
+                    "work experience",
+                    "additional",
+                    "extracurricular",
+                    "certifications",
+                    "references",
+                    "volunteer",
+                    "interests",
+                    "hobbies",
+                    "projects",
+                }
+            ):
                 # New section header encountered.
                 break
 
@@ -127,11 +138,21 @@ class SkillExtractor:
                     if not cleaned or len(cleaned) > 35:
                         continue
                     # Skip entries that look like descriptions/sentences
-                    if any(cleaned.lower().startswith(w) for w in [
-                        "native", "in-depth", "expertise in", "strong",
-                        "effective", "with ", "knowledge of", "experience in",
-                        "ability to", "proficient in",
-                    ]):
+                    if any(
+                        cleaned.lower().startswith(w)
+                        for w in [
+                            "native",
+                            "in-depth",
+                            "expertise in",
+                            "strong",
+                            "effective",
+                            "with ",
+                            "knowledge of",
+                            "experience in",
+                            "ability to",
+                            "proficient in",
+                        ]
+                    ):
                         continue
                     extracted.append(cleaned)
 

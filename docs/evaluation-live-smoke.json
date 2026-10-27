@@ -1,0 +1,652 @@
+{
+  "report_version": "evaluation-v2",
+  "dataset_version": "synthetic-v2",
+  "dataset_sha256": "9525306c753d785995fbedca21e157d35c12cb5dae65135f3c977040a642225a",
+  "implementation_sha256": "a2a8a559ef892e053037319bcbf31f4799c940922c5e037ac623abda89bab2ec",
+  "as_of_date": "2026-10-27",
+  "python": "3.12.6",
+  "scoring_version": "rubric-v2",
+  "annotation": {
+    "source": "developer-authored synthetic labels",
+    "independent": false,
+    "grade_scale": "0 unsuitable, 1 limited evidence, 2 relevant, 3 strong evidence",
+    "note": "Skills label evidenced capabilities, not every technology mentioned. No independent raters."
+  },
+  "independence_verified": false,
+  "selection": {
+    "split": "regression",
+    "limit": 2,
+    "total_dataset_records": 24
+  },
+  "records": 2,
+  "k": 5,
+  "mode": "live hybrid AI and local baselines",
+  "email_accuracy": 1.0,
+  "experience_mae_years": 0.0,
+  "skill_precision": 1.0,
+  "skill_recall": 1.0,
+  "skill_f1": 1.0,
+  "confidence_intervals_95": {
+    "email_accuracy": [
+      1.0,
+      1.0
+    ],
+    "experience_mae_years": [
+      0.0,
+      0.0
+    ],
+    "skill_f1": [
+      1.0,
+      1.0
+    ]
+  },
+  "bootstrap": {
+    "samples": 500,
+    "seed": 42,
+    "method": "Resume-level percentile bootstrap; conditional on this corpus, not population validity."
+  },
+  "ranking": {
+    "backend": {
+      "rubric": {
+        "ndcg_at_k": 1.0,
+        "recall_at_k": 1.0,
+        "mrr": 1.0,
+        "ordered_ids": [
+          "email-standard",
+          "email-obfuscated"
+        ],
+        "scores": [
+          83.33,
+          30.0
+        ]
+      },
+      "exact_skills": {
+        "ndcg_at_k": 1.0,
+        "recall_at_k": 1.0,
+        "mrr": 1.0,
+        "ordered_ids": [
+          "email-standard",
+          "email-obfuscated"
+        ],
+        "scores": [
+          0.6667,
+          0.0
+        ]
+      },
+      "tfidf": {
+        "ndcg_at_k": 1.0,
+        "recall_at_k": 1.0,
+        "mrr": 1.0,
+        "ordered_ids": [
+          "email-standard",
+          "email-obfuscated"
+        ],
+        "scores": [
+          0.3495,
+          0.0
+        ]
+      },
+      "hybrid_ai": {
+        "ndcg_at_k": 1.0,
+        "recall_at_k": 1.0,
+        "mrr": 1.0,
+        "ordered_ids": [
+          "email-standard",
+          "email-obfuscated"
+        ],
+        "scores": [
+          79.25,
+          25.0
+        ]
+      }
+    },
+    "frontend": {
+      "rubric": {
+        "ndcg_at_k": 1.0,
+        "recall_at_k": 1.0,
+        "mrr": 1.0,
+        "ordered_ids": [
+          "email-obfuscated",
+          "email-standard"
+        ],
+        "scores": [
+          100,
+          37.5
+        ]
+      },
+      "exact_skills": {
+        "ndcg_at_k": 1.0,
+        "recall_at_k": 1.0,
+        "mrr": 1.0,
+        "ordered_ids": [
+          "email-obfuscated",
+          "email-standard"
+        ],
+        "scores": [
+          1.0,
+          0.0
+        ]
+      },
+      "tfidf": {
+        "ndcg_at_k": 1.0,
+        "recall_at_k": 1.0,
+        "mrr": 1.0,
+        "ordered_ids": [
+          "email-obfuscated",
+          "email-standard"
+        ],
+        "scores": [
+          0.3196,
+          0.0
+        ]
+      },
+      "hybrid_ai": {
+        "ndcg_at_k": 1.0,
+        "recall_at_k": 1.0,
+        "mrr": 1.0,
+        "ordered_ids": [
+          "email-obfuscated",
+          "email-standard"
+        ],
+        "scores": [
+          100.0,
+          28.12
+        ]
+      }
+    }
+  },
+  "by_split": {
+    "regression": {
+      "records": 2,
+      "email_accuracy": 1.0,
+      "experience_mae_years": 0.0,
+      "skill_precision": 1.0,
+      "skill_recall": 1.0,
+      "skill_f1": 1.0,
+      "ranking": {
+        "backend": {
+          "rubric": {
+            "ndcg_at_k": 1.0,
+            "recall_at_k": 1.0,
+            "mrr": 1.0,
+            "ordered_ids": [
+              "email-standard",
+              "email-obfuscated"
+            ],
+            "scores": [
+              83.33,
+              30.0
+            ]
+          },
+          "exact_skills": {
+            "ndcg_at_k": 1.0,
+            "recall_at_k": 1.0,
+            "mrr": 1.0,
+            "ordered_ids": [
+              "email-standard",
+              "email-obfuscated"
+            ],
+            "scores": [
+              0.6667,
+              0.0
+            ]
+          },
+          "tfidf": {
+            "ndcg_at_k": 1.0,
+            "recall_at_k": 1.0,
+            "mrr": 1.0,
+            "ordered_ids": [
+              "email-standard",
+              "email-obfuscated"
+            ],
+            "scores": [
+              0.3495,
+              0.0
+            ]
+          },
+          "hybrid_ai": {
+            "ndcg_at_k": 1.0,
+            "recall_at_k": 1.0,
+            "mrr": 1.0,
+            "ordered_ids": [
+              "email-standard",
+              "email-obfuscated"
+            ],
+            "scores": [
+              79.25,
+              25.0
+            ]
+          }
+        },
+        "frontend": {
+          "rubric": {
+            "ndcg_at_k": 1.0,
+            "recall_at_k": 1.0,
+            "mrr": 1.0,
+            "ordered_ids": [
+              "email-obfuscated",
+              "email-standard"
+            ],
+            "scores": [
+              100,
+              37.5
+            ]
+          },
+          "exact_skills": {
+            "ndcg_at_k": 1.0,
+            "recall_at_k": 1.0,
+            "mrr": 1.0,
+            "ordered_ids": [
+              "email-obfuscated",
+              "email-standard"
+            ],
+            "scores": [
+              1.0,
+              0.0
+            ]
+          },
+          "tfidf": {
+            "ndcg_at_k": 1.0,
+            "recall_at_k": 1.0,
+            "mrr": 1.0,
+            "ordered_ids": [
+              "email-obfuscated",
+              "email-standard"
+            ],
+            "scores": [
+              0.3196,
+              0.0
+            ]
+          },
+          "hybrid_ai": {
+            "ndcg_at_k": 1.0,
+            "recall_at_k": 1.0,
+            "mrr": 1.0,
+            "ordered_ids": [
+              "email-obfuscated",
+              "email-standard"
+            ],
+            "scores": [
+              100.0,
+              28.12
+            ]
+          }
+        }
+      }
+    }
+  },
+  "failure_cases": [],
+  "cases": [
+    {
+      "id": "email-standard",
+      "split": "regression",
+      "category": "extraction-regression",
+      "email_correct": true,
+      "experience_absolute_error": 0.0,
+      "expected_years": 2,
+      "extracted_years": 2.0,
+      "true_positive_skills": 2,
+      "unexpected_skills": [],
+      "missing_skills": []
+    },
+    {
+      "id": "email-obfuscated",
+      "split": "regression",
+      "category": "extraction-regression",
+      "email_correct": true,
+      "experience_absolute_error": 0.0,
+      "expected_years": 3,
+      "extracted_years": 3.0,
+      "true_positive_skills": 2,
+      "unexpected_skills": [],
+      "missing_skills": []
+    }
+  ],
+  "cross_split_duplicate_documents": 0,
+  "independent_human_agreement": null,
+  "external_requests": 4,
+  "external_cost_usd": null,
+  "successful_ai_scores": 4,
+  "score_runs": [
+    {
+      "record_id": "email-standard",
+      "job_id": "backend",
+      "snapshot": {
+        "schema_version": "score-audit-v1",
+        "implementation_sha256": "840fb1f8b50ee616d873f446e927919a3b01ac57cbb9041e4aa2a38144c1fb5f",
+        "calculated_at": "2026-10-27T16:02:06.442276+00:00",
+        "inputs": {
+          "candidate": {
+            "skills": [
+              "Python",
+              "Django"
+            ],
+            "years": 2.0,
+            "education": "Bachelor of Computer Science",
+            "revision": null
+          },
+          "job": {
+            "required_skills": [
+              "Python",
+              "Django",
+              "PostgreSQL"
+            ],
+            "minimum_experience": 2,
+            "education_requirement": "Bachelor of Computer Science",
+            "scoring_weights": {
+              "skills": 0.5,
+              "experience": 0.3,
+              "education": 0.2
+            },
+            "revision": null
+          }
+        },
+        "rubric": {
+          "version": "rubric-v2",
+          "score": 83.33,
+          "components": {
+            "skills": {
+              "ratio": 0.6666666666666666,
+              "weight": 0.5
+            },
+            "experience": {
+              "ratio": 1,
+              "weight": 0.3
+            },
+            "education": {
+              "ratio": 1.0,
+              "weight": 0.2
+            }
+          },
+          "matched_skills": [
+            "Python",
+            "Django"
+          ],
+          "missing_skills": [
+            "PostgreSQL"
+          ]
+        },
+        "ai": {
+          "enabled": true,
+          "provider": "groq",
+          "model": "openai/gpt-oss-20b",
+          "prompt_version": "screening-v2",
+          "score": 67,
+          "requested_weight": 0.25,
+          "applied_weight": 0.25,
+          "explanation": "The candidate meets 2 of the 3 required technical skills (Python and Django) and matches the required years of experience and education. The only missing skill is PostgreSQL, resulting in a 67% match score.",
+          "fallback_reason": "",
+          "provider_attempts": [
+            {
+              "provider": "groq",
+              "status": "success",
+              "message": "A validated response was received from the provider."
+            }
+          ]
+        },
+        "insufficient_requirements": false,
+        "final_score": 79.25,
+        "formula": "round(local_score * (1 - applied_ai_weight) + ai_score * applied_ai_weight, 2)",
+        "sha256": "7dd32b038dd90eaa41b76a3715b3c1971e1ee8e9d99c94d420537408ebcd17d3"
+      }
+    },
+    {
+      "record_id": "email-obfuscated",
+      "job_id": "backend",
+      "snapshot": {
+        "schema_version": "score-audit-v1",
+        "implementation_sha256": "840fb1f8b50ee616d873f446e927919a3b01ac57cbb9041e4aa2a38144c1fb5f",
+        "calculated_at": "2026-10-27T16:02:06.949260+00:00",
+        "inputs": {
+          "candidate": {
+            "skills": [
+              "React",
+              "TypeScript"
+            ],
+            "years": 3.0,
+            "education": "Bachelor of Fine Arts",
+            "revision": null
+          },
+          "job": {
+            "required_skills": [
+              "Python",
+              "Django",
+              "PostgreSQL"
+            ],
+            "minimum_experience": 2,
+            "education_requirement": "Bachelor of Computer Science",
+            "scoring_weights": {
+              "skills": 0.5,
+              "experience": 0.3,
+              "education": 0.2
+            },
+            "revision": null
+          }
+        },
+        "rubric": {
+          "version": "rubric-v2",
+          "score": 30.0,
+          "components": {
+            "skills": {
+              "ratio": 0.0,
+              "weight": 0.5
+            },
+            "experience": {
+              "ratio": 1,
+              "weight": 0.3
+            },
+            "education": {
+              "ratio": 0.0,
+              "weight": 0.2
+            }
+          },
+          "matched_skills": [],
+          "missing_skills": [
+            "Python",
+            "Django",
+            "PostgreSQL"
+          ]
+        },
+        "ai": {
+          "enabled": true,
+          "provider": "groq",
+          "model": "openai/gpt-oss-20b",
+          "prompt_version": "screening-v2",
+          "score": 10,
+          "requested_weight": 0.25,
+          "applied_weight": 0.25,
+          "explanation": "The candidate does not possess any of the job\u2019s required technical skills (Python, Django, PostgreSQL). While the candidate has 3 years of experience, it is in unrelated technologies (React, TypeScript). Therefore the match is very low.",
+          "fallback_reason": "",
+          "provider_attempts": [
+            {
+              "provider": "groq",
+              "status": "success",
+              "message": "A validated response was received from the provider."
+            }
+          ]
+        },
+        "insufficient_requirements": false,
+        "final_score": 25.0,
+        "formula": "round(local_score * (1 - applied_ai_weight) + ai_score * applied_ai_weight, 2)",
+        "sha256": "b7412c44fad4e026cc2f906e665791b54d78efaabff95c26448bb9999fd4e998"
+      }
+    },
+    {
+      "record_id": "email-standard",
+      "job_id": "frontend",
+      "snapshot": {
+        "schema_version": "score-audit-v1",
+        "implementation_sha256": "840fb1f8b50ee616d873f446e927919a3b01ac57cbb9041e4aa2a38144c1fb5f",
+        "calculated_at": "2026-10-27T16:02:08.482841+00:00",
+        "inputs": {
+          "candidate": {
+            "skills": [
+              "Python",
+              "Django"
+            ],
+            "years": 2.0,
+            "education": "Bachelor of Computer Science",
+            "revision": null
+          },
+          "job": {
+            "required_skills": [
+              "React",
+              "TypeScript"
+            ],
+            "minimum_experience": 2,
+            "education_requirement": "",
+            "scoring_weights": {
+              "skills": 0.5,
+              "experience": 0.3,
+              "education": 0.2
+            },
+            "revision": null
+          }
+        },
+        "rubric": {
+          "version": "rubric-v2",
+          "score": 37.5,
+          "components": {
+            "skills": {
+              "ratio": 0.0,
+              "weight": 0.625
+            },
+            "experience": {
+              "ratio": 1,
+              "weight": 0.375
+            },
+            "education": {
+              "ratio": null,
+              "weight": 0
+            }
+          },
+          "matched_skills": [],
+          "missing_skills": [
+            "React",
+            "TypeScript"
+          ]
+        },
+        "ai": {
+          "enabled": true,
+          "provider": "groq",
+          "model": "openai/gpt-oss-20b",
+          "prompt_version": "screening-v2",
+          "score": 0,
+          "requested_weight": 0.25,
+          "applied_weight": 0.25,
+          "explanation": "The candidate\u2019s skill set (Python, Django) does not overlap with the job\u2019s required skills (React, TypeScript). Years of experience match, but the lack of required technical skills results in a score of 0.",
+          "fallback_reason": "",
+          "provider_attempts": [
+            {
+              "provider": "groq",
+              "status": "success",
+              "message": "A validated response was received from the provider."
+            }
+          ]
+        },
+        "insufficient_requirements": false,
+        "final_score": 28.12,
+        "formula": "round(local_score * (1 - applied_ai_weight) + ai_score * applied_ai_weight, 2)",
+        "sha256": "d34200fc69cf4f593b028c5c7933d778b4257964da7fd79d578a4567561e8953"
+      }
+    },
+    {
+      "record_id": "email-obfuscated",
+      "job_id": "frontend",
+      "snapshot": {
+        "schema_version": "score-audit-v1",
+        "implementation_sha256": "840fb1f8b50ee616d873f446e927919a3b01ac57cbb9041e4aa2a38144c1fb5f",
+        "calculated_at": "2026-10-27T16:02:09.406836+00:00",
+        "inputs": {
+          "candidate": {
+            "skills": [
+              "React",
+              "TypeScript"
+            ],
+            "years": 3.0,
+            "education": "Bachelor of Fine Arts",
+            "revision": null
+          },
+          "job": {
+            "required_skills": [
+              "React",
+              "TypeScript"
+            ],
+            "minimum_experience": 2,
+            "education_requirement": "",
+            "scoring_weights": {
+              "skills": 0.5,
+              "experience": 0.3,
+              "education": 0.2
+            },
+            "revision": null
+          }
+        },
+        "rubric": {
+          "version": "rubric-v2",
+          "score": 100,
+          "components": {
+            "skills": {
+              "ratio": 1,
+              "weight": 0.625
+            },
+            "experience": {
+              "ratio": 1,
+              "weight": 0.375
+            },
+            "education": {
+              "ratio": null,
+              "weight": 0
+            }
+          },
+          "matched_skills": [
+            "React",
+            "TypeScript"
+          ],
+          "missing_skills": []
+        },
+        "ai": {
+          "enabled": true,
+          "provider": "groq",
+          "model": "openai/gpt-oss-20b",
+          "prompt_version": "screening-v2",
+          "score": 100,
+          "requested_weight": 0.25,
+          "applied_weight": 0.25,
+          "explanation": "The candidate possesses all required skills (React, TypeScript), exceeds the required experience (3.0 years vs 2 years), and has a Bachelor of Fine Arts degree, which satisfies or surpasses the job's education requirement. Therefore the candidate is fully matched.",
+          "fallback_reason": "",
+          "provider_attempts": [
+            {
+              "provider": "groq",
+              "status": "success",
+              "message": "A validated response was received from the provider."
+            }
+          ]
+        },
+        "insufficient_requirements": false,
+        "final_score": 100.0,
+        "formula": "round(local_score * (1 - applied_ai_weight) + ai_score * applied_ai_weight, 2)",
+        "sha256": "a3ea148040e39be7dadffb54f55ca82e79851229c8cfd86714d872492823f98b"
+      }
+    }
+  ],
+  "checks": {
+    "split": "regression",
+    "email_accuracy_min": 0.9,
+    "experience_mae_years_max": 0.5,
+    "skill_f1_min": 0.8,
+    "passed": true,
+    "scope": "Extraction regression thresholds only; not AI quality or ranking certification."
+  },
+  "extraction_wall_seconds": 0.138092,
+  "ranking_wall_seconds": 4.415636,
+  "limitations": [
+    "Bundled examples and grades are synthetic developer-authored cases, not independent hiring evidence.",
+    "Cross-split duplicate checks detect normalized identical text, not near-duplicate resumes or label leakage.",
+    "Train/validation/test labels alone do not establish an independent held-out study.",
+    "Ranking ties use record ID; recall treats grades 2-3 as relevant; no relevant records yields null recall.",
+    "Email, experience and skills are measured; education, OCR, multilingual coverage and demographic fairness are not established.",
+    "Live models may change. Saved AI scores allow arithmetic replay, not identical future model generations.",
+    "Baseline TF-IDF/optional LSA fit the selected corpus; this is a within-corpus ranking comparison."
+  ]
+}

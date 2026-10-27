@@ -1,0 +1,28 @@
+{
+  "started_at": "2026-10-26T18:18:37.008Z",
+  "steps": [
+    "Sign-in form establishes an HttpOnly session and loads dashboard data",
+    "Job creation form persists owned requirements",
+    "Bulk upload queues real files; worker extracts DOCX and reports unreadable PDF failure",
+    "Recruiter corrects evidence and matching records the revised profile",
+    "Human review transitions applied -> review -> shortlisted with durable notes",
+    "Missing provider configuration yields a truthful local fallback",
+    "Mobile navigation is available"
+  ],
+  "screenshots": [
+    "01-sign-in.png",
+    "02-dashboard.png",
+    "03-jobs.png",
+    "04-candidates.png",
+    "05-candidate-evidence.png",
+    "06-human-review.png",
+    "07-rankings.png",
+    "08-ai-tools.png",
+    "09-automation-failure.png",
+    "10-unreadable-resume.png",
+    "11-mobile-dashboard.png"
+  ],
+  "errors": [],
+  "passed": true,
+  "finished_at": "2026-10-26T18:19:05.988Z"
+}

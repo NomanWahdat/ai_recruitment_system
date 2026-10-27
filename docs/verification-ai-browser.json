@@ -1,0 +1,15 @@
+{
+  "started_at": "2026-10-26T22:23:17.877Z",
+  "steps": [
+    "Sign-in form establishes an HttpOnly session and loads dashboard data",
+    "AI configuration, synthetic connection check and local responses explain missing/disabled providers"
+  ],
+  "screenshots": [
+    "01-sign-in.png",
+    "02-dashboard.png",
+    "08-ai-tools.png"
+  ],
+  "errors": [],
+  "passed": true,
+  "finished_at": "2026-10-26T22:23:28.104Z"
+}

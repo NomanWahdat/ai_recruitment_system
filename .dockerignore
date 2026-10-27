@@ -1,0 +1,10 @@
+.git
+.runtime
+**/.runtime
+**/__pycache__
+frontend/node_modules
+frontend/.next
+.venv
+media
+.env
+.coverage

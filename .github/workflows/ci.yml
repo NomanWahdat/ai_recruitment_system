@@ -1,0 +1,66 @@
+name: Verify recruitment workflows
+on: [push, pull_request]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: recruitment
+          POSTGRES_PASSWORD: ci-only
+          POSTGRES_DB: recruitment
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U recruitment"
+          --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      DB_NAME: recruitment
+      DB_USER: recruitment
+      DB_PASSWORD: ci-only
+      DB_HOST: 127.0.0.1
+      TEST_POSTGRES: "true"
+      SECRET_KEY: ci-isolated-test-key-only-61f37b92941e4f0a90d1ea9dd620b979
+      DATABASE_URL: postgres://recruitment:ci-only@127.0.0.1:5432/recruitment
+      USE_GROQ_AI: "false"
+      USE_GEMINI_FALLBACK: "false"
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - uses: actions/setup-node@v4
+        with: {node-version: "22", cache: npm, cache-dependency-path: frontend/package-lock.json}
+      - run: pip install -r requirements-dev.txt -c requirements.lock.txt
+      - run: ruff check apps config tools seed_data.py
+      - run: ruff format --check apps config tools seed_data.py
+      - run: python -m coverage run manage.py test --settings=config.settings.test --noinput
+      - run: python -m coverage report
+      - run: python manage.py makemigrations --check --dry-run
+      - run: python manage.py check --deploy --settings=config.settings.production
+      - run: python tools/evaluate.py --check --output .runtime/ci-evaluation.json
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+        working-directory: frontend
+      - run: npm run lint && npm run typecheck && npm run build
+        working-directory: frontend
+      - name: Browser workflow
+        shell: bash
+        run: |
+          python manage.py migrate --noinput
+          python manage.py seed_demo
+          python tools/create_demo_files.py
+          mkdir -p .runtime
+          python manage.py runserver 127.0.0.1:8000 --noreload > .runtime/api.log 2>&1 &
+          python manage.py process_tasks > .runtime/worker.log 2>&1 &
+          (cd frontend && npm run start -- --hostname 127.0.0.1) > .runtime/frontend.log 2>&1 &
+          node tools/browser_e2e.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: verification-evidence
+          path: |
+            .runtime/*.log
+            docs/verification-browser.json
+            docs/evaluation-results.json
+            docs/coverage.json
+            docs/screenshots/

@@ -1,0 +1,48 @@
+# Local development/demo. Production configuration is documented in docs/DEPLOYMENT.md.
+x-backend: &backend
+  build: .
+  environment: &environment
+    DJANGO_SETTINGS_MODULE: config.settings.development
+    SECRET_KEY: local-compose-only-change-for-production-61923841612389416
+    DB_NAME: recruitment
+    DB_USER: recruitment
+    DB_PASSWORD: local-demo-only
+    DB_HOST: db
+  volumes:
+    - resumes:/app/media
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: recruitment
+      POSTGRES_USER: recruitment
+      POSTGRES_PASSWORD: local-demo-only
+    volumes: [database:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U recruitment"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  migrate:
+    <<: *backend
+    command: ["python","manage.py","migrate","--noinput"]
+    depends_on:
+      db: {condition: service_healthy}
+  api:
+    <<: *backend
+    command: ["gunicorn","config.wsgi:application","--bind","0.0.0.0:8000","--workers","2"]
+    ports: ["8000:8000"]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+  worker:
+    <<: *backend
+    command: ["python","manage.py","process_tasks"]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+  frontend:
+    build: ./frontend
+    ports: ["3000:3000"]
+    depends_on: [api]
+volumes:
+  database:
+  resumes:

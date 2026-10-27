@@ -59,7 +59,9 @@ def normalize_skills(skills: List[str]) -> List[str]:
     return results
 
 
-def compare_skills(job_skills: List[str], candidate_skills: List[str]) -> Tuple[List[str], List[str]]:
+def compare_skills(
+    job_skills: List[str], candidate_skills: List[str]
+) -> Tuple[List[str], List[str]]:
     """Return (matched_skills, missing_skills) with original-cased job_skills preserved when possible."""
     job_norm = normalize_skills(job_skills)
     cand_norm = normalize_skills(candidate_skills)

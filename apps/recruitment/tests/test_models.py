@@ -1,4 +1,5 @@
 """Tests for recruitment models."""
+
 from django.test import TestCase
 from apps.recruitment.models import Job, Candidate
 

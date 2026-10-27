@@ -1,0 +1,147 @@
+{
+  "checked_at_utc": "2026-10-26T22:25:27.629986+00:00",
+  "data": "Only the synthetic portfolio_demo Kate Example and Backend Engineer fixtures. Names, email and raw CV are not sent to the providers.",
+  "provider_configuration": {
+    "available": true,
+    "verified": false,
+    "providers": [
+      {
+        "provider": "groq",
+        "model": "openai/gpt-oss-20b",
+        "enabled": true,
+        "status": "ready",
+        "message": "Configured; use Test AI connection to verify access."
+      },
+      {
+        "provider": "gemini",
+        "model": "gemini-3.5-flash-lite",
+        "enabled": true,
+        "status": "missing_key",
+        "message": "No API key is configured."
+      }
+    ],
+    "scoring_enabled": true,
+    "message": "Configuration only; a successful connection test verifies provider access."
+  },
+  "results": {
+    "job_parsing": {
+      "skills": [
+        "Python",
+        "Django",
+        "PostgreSQL"
+      ],
+      "role_type": "Backend developer",
+      "experience_level": "Two years experience.",
+      "summary": "Backend developer with experience in Python, Django, and PostgreSQL, having two years of experience.",
+      "response_source": "groq",
+      "fallback_used": false,
+      "fallback_reason": "",
+      "provider_attempts": [
+        {
+          "provider": "groq",
+          "status": "success",
+          "message": "A validated response was received from the provider."
+        }
+      ],
+      "model": "openai/gpt-oss-20b",
+      "prompt_version": "screening-v2"
+    },
+    "matching": {
+      "response_source": "groq",
+      "fallback_used": false,
+      "fallback_reason": "",
+      "provider_attempts": [
+        {
+          "provider": "groq",
+          "status": "success",
+          "message": "A validated response was received from the provider."
+        }
+      ],
+      "score": 100.0,
+      "deterministic_score": 100,
+      "llm_score": 100,
+      "matched_skills": [
+        "Python",
+        "Django",
+        "PostgreSQL"
+      ],
+      "missing_skills": [],
+      "score_components": {
+        "skills": {
+          "ratio": 1,
+          "weight": 0.5
+        },
+        "experience": {
+          "ratio": 1,
+          "weight": 0.3
+        },
+        "education": {
+          "ratio": 1.0,
+          "weight": 0.2
+        }
+      },
+      "insufficient_requirements": false,
+      "provider": "groq",
+      "provider_model": "openai/gpt-oss-20b",
+      "llm_explanation": "The candidate\u2019s skill set exactly matches the job requirements, with 4 years of experience versus the 2-year minimum and matching education. All required skills are present, so the score is 100.",
+      "experience_match": true,
+      "education_match": true,
+      "match_score": 100.0,
+      "analysis_id": 86,
+      "candidate_id": 28,
+      "job_id": 17
+    },
+    "explanation": {
+      "summary": "Candidate meets all required skills with a full match.",
+      "strengths": [
+        "Python",
+        "Django",
+        "PostgreSQL"
+      ],
+      "weaknesses": [],
+      "recommendation": "Strongly recommended for the role.",
+      "response_source": "groq",
+      "fallback_used": false,
+      "fallback_reason": "",
+      "provider_attempts": [
+        {
+          "provider": "groq",
+          "status": "success",
+          "message": "A validated response was received from the provider."
+        }
+      ],
+      "model": "openai/gpt-oss-20b"
+    },
+    "interview_questions": {
+      "technical_questions": [
+        "What is the difference between a Django model's Meta 'db_table' option and the default table naming convention?",
+        "Explain how Django's ORM handles many-to-many relationships and how you would customize the through model.",
+        "Describe the process of creating and applying a PostgreSQL migration in a Django project.",
+        "How does Django's query caching work and what are the best practices to avoid cache misses?",
+        "Explain the role of PostgreSQL's 'pg_stat_statements' view in performance tuning of a Django application."
+      ],
+      "behavioral_questions": [
+        "Tell me about a time you had to debug a complex performance issue in a Django application. What steps did you take?",
+        "Describe a situation where you had to collaborate with a database administrator to optimize a PostgreSQL schema. How did you approach it?",
+        "Give an example of how you handled a conflict between a developer's feature request and a database constraint in a production environment."
+      ],
+      "skill_based_questions": [
+        "Can you write a Django model that includes a UUID primary key and a timestamp field that auto-updates on each save?",
+        "Show how you would write a PostgreSQL function to calculate the average order value for a given customer and expose it via Django's ORM."
+      ],
+      "response_source": "groq",
+      "fallback_used": false,
+      "fallback_reason": "",
+      "provider_attempts": [
+        {
+          "provider": "groq",
+          "status": "success",
+          "message": "A validated response was received from the provider."
+        }
+      ],
+      "model": "openai/gpt-oss-20b"
+    }
+  },
+  "live_provider_success": true,
+  "quality_claim": "Connectivity/schema and API persistence checks only; no independent accuracy claim."
+}

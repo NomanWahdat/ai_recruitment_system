@@ -1,0 +1,10 @@
+[run]
+source = apps.recruitment
+omit =
+    */migrations/*
+    */tests/*
+    */admin.py
+[report]
+show_missing = True
+fail_under = 75
+skip_covered = True

@@ -1,0 +1,17 @@
+{
+  "started_at": "2026-10-27T16:04:31.152Z",
+  "steps": [
+    "Sign-in form establishes an HttpOnly session and loads dashboard data",
+    "Evaluation renders separate measured splits, honest failure cases and a matching downloadable report",
+    "Matching appends snapshots; current arithmetic verifies with zero AI calls; history and JSON download preserve the saved run"
+  ],
+  "screenshots": [
+    "01-sign-in.png",
+    "02-dashboard.png",
+    "13-accuracy-evaluation.png",
+    "14-reproducible-scoring.png"
+  ],
+  "errors": [],
+  "passed": true,
+  "finished_at": "2026-10-27T16:04:48.877Z"
+}

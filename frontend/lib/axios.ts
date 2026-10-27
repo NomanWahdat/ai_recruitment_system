@@ -1,46 +1,32 @@
 import axios from "axios";
 
-const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api";
-
-export const apiClient = axios.create({
-  baseURL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-apiClient.interceptors.request.use((config) => {
-  if (typeof window !== "undefined") {
-    const token = localStorage.getItem("auth_token");
-    if (token) {
-      config.headers = config.headers || {};
-      config.headers.Authorization = `Token ${token}`;
+const localHost = typeof window !== "undefined" && window.location.hostname === "localhost" ? "localhost" : "127.0.0.1";
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || `http://${localHost}:8000/api`;
+let csrfToken: string | undefined;
+export const apiClient = axios.create({ baseURL, withCredentials: true });
+apiClient.interceptors.request.use(async (config) => {
+  if (!["get", "head", "options"].includes(config.method || "get")) {
+    if (!csrfToken) {
+      const response = await axios.get(baseURL + "/auth/csrf/", { withCredentials: true });
+      csrfToken = response.data.csrfToken;
     }
-  }
-  if (process.env.NODE_ENV !== "production") {
-    console.log("[api] request", config.method?.toUpperCase(), config.url);
+    config.headers.set("X-CSRFToken", csrfToken);
   }
   return config;
 });
-
-apiClient.interceptors.response.use(
-  (response) => {
-    if (process.env.NODE_ENV !== "production") {
-      console.log("[api] response", response.status, response.config.url);
-    }
-    return response;
-  },
-  (error) => {
-    if (process.env.NODE_ENV !== "production") {
-      try {
-        const status = error?.response?.status;
-        const url = error?.config?.url;
-        const data = error?.response?.data;
-        console.error("[api] error", status, url, data);
-      } catch (e) {
-        console.error("[api] error", error?.message || error);
-      }
-    }
-    return Promise.reject(error);
-  },
-);
+apiClient.interceptors.response.use(response => {
+  if (response.data?.csrfToken) csrfToken = response.data.csrfToken;
+  return response;
+}, error => {
+  if (error.response?.status === 401 && typeof window !== "undefined") {
+    window.dispatchEvent(new Event("auth-expired"));
+  }
+  return Promise.reject(error);
+});
+export function errorMessage(error: unknown): string {
+  if (axios.isAxiosError(error)) {
+    const data = error.response?.data;
+    return data?.detail || (data ? JSON.stringify(data) : "Cannot reach the API. Check the connection.");
+  }
+  return error instanceof Error ? error.message : "Request failed.";
+}

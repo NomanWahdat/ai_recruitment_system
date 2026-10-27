@@ -95,7 +95,7 @@ export function SignUpForm({ onSwitch }: { onSwitch: () => void }) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="mt-2 w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-200"
-              placeholder="Min. 6 characters"
+              placeholder="Use a strong password (8+ characters)"
             />
           </div>
           <div>

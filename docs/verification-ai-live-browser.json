@@ -1,0 +1,15 @@
+{
+  "started_at": "2026-10-26T22:26:00.238Z",
+  "steps": [
+    "Sign-in form establishes an HttpOnly session and loads dashboard data",
+    "Live Groq connection, job parsing, match explanation and interview questions render in the browser using synthetic fixtures"
+  ],
+  "screenshots": [
+    "01-sign-in.png",
+    "02-dashboard.png",
+    "12-groq-ai-verified.png"
+  ],
+  "errors": [],
+  "passed": true,
+  "finished_at": "2026-10-26T22:26:15.105Z"
+}

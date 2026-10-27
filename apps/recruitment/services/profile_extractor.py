@@ -11,20 +11,21 @@ logger = logging.getLogger(__name__)
 # Try to import spacy, but provide fallback if not available
 try:
     import spacy
+
     SPACY_AVAILABLE = True
 except ImportError:
     SPACY_AVAILABLE = False
     spacy = None
-    logger.warning("spaCy not installed. NLP features will use fallback methods.")
+    logger.warning("spaCy unavailable. Deterministic extraction fallback is active.")
 
 
 class ProfileExtractor:
-    def __init__(self):
-        self.nlp = self._load_nlp_model()
+    def __init__(self, use_nlp=True, as_of=None):
+        self.nlp = self._load_nlp_model() if use_nlp else None
         self.entity_parser = EntityParser()
         self.skill_extractor = SkillExtractor()
         self.education_extractor = EducationExtractor()
-        self.experience_extractor = ExperienceExtractor()
+        self.experience_extractor = ExperienceExtractor(as_of=as_of)
 
     def extract(self, text):
         normalized_text = normalize_text(text)
@@ -55,12 +56,16 @@ class ProfileExtractor:
             logger.exception("Name extraction failed: %s", exc)
 
         try:
-            extracted["email"] = self.entity_parser.extract_email(normalized_text) or extracted["email"]
+            extracted["email"] = (
+                self.entity_parser.extract_email(normalized_text) or extracted["email"]
+            )
         except Exception as exc:
             logger.exception("Email extraction failed: %s", exc)
 
         try:
-            extracted["phone_number"] = self.entity_parser.extract_phone(normalized_text) or extracted["phone_number"]
+            extracted["phone_number"] = (
+                self.entity_parser.extract_phone(normalized_text) or extracted["phone_number"]
+            )
         except Exception as exc:
             logger.exception("Phone extraction failed: %s", exc)
 
@@ -71,7 +76,9 @@ class ProfileExtractor:
             logger.exception("Skill extraction failed: %s", exc)
 
         try:
-            extracted["education"] = self.education_extractor.extract(normalized_text) or extracted["education"]
+            extracted["education"] = (
+                self.education_extractor.extract(normalized_text) or extracted["education"]
+            )
         except Exception as exc:
             logger.exception("Education extraction failed: %s", exc)
 

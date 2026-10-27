@@ -1,0 +1,64 @@
+{
+  "generated_at_utc": "2026-10-26T18:22:21.382519+00:00",
+  "base_commit": "a585901eea6497abd5e174f95499266945430878",
+  "branch": "improvement/portfolio-hardening",
+  "publication": "Pre-publication verification snapshot on improvement/portfolio-hardening; see Git history for the implementation commit.",
+  "python": "3.12.6",
+  "isolated_virtualenv": true,
+  "backend_packages": {
+    "Django": "5.2.1",
+    "djangorestframework": "3.16.0",
+    "spacy": "3.7.5",
+    "requests": "2.32.3",
+    "coverage": "7.6.12",
+    "ruff": "0.14.0"
+  },
+  "postgres_version_number": 140022,
+  "postgres_tests": {
+    "discovered": 79,
+    "passed": 79,
+    "skipped": 0
+  },
+  "sqlite_tests": {
+    "discovered": 79,
+    "passed": 77,
+    "skipped": 2,
+    "reason": "PostgreSQL concurrency semantics"
+  },
+  "backend_statement_coverage_percent": 85.16,
+  "coverage_exclusions": [
+    "migrations",
+    "tests",
+    "admin"
+  ],
+  "browser_workflow": true,
+  "screenshots": 11,
+  "checks": {
+    "frontend_http": 200,
+    "api_health": 200,
+    "anonymous_candidates": 401
+  },
+  "frontend_checks": [
+    "eslint (zero warnings)",
+    "TypeScript",
+    "next build"
+  ],
+  "python_checks": [
+    "ruff check",
+    "ruff format --check",
+    "pip check",
+    "migration consistency",
+    "Django deployment check with required env"
+  ],
+  "constraints_sha256": "de5fade6464f41ece7a876cbc85e74dbae85071b3e404977868cdff885b9f151",
+  "not_verified": [
+    "live AI-provider quality",
+    "Docker build/runtime (Docker unavailable)",
+    "remote GitHub Actions execution",
+    "independent human agreement or demographic fairness"
+  ],
+  "retrieval_experiments": [
+    "TF-IDF lexical retrieval",
+    "two-dimensional SVD/LSA latent semantic retrieval"
+  ]
+}
