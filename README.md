@@ -2,19 +2,39 @@
 
 A Django REST Framework + Next.js recruiter workspace for private CV processing, evidence review, job-specific matching, human hiring decisions, accuracy evaluation and reproducible scoring.
 
-**Scores are advisory rubric comparisons, not hiring probabilities.** External AI is optional and disabled by default.
+**Scores support human review; they are not hiring probabilities.** External AI is optional and disabled by default in a fresh installation.
 
-## Workflow
+The current implementation is on [improvement/portfolio-hardening](https://github.com/NomanWahdat/ai_recruitment_system/tree/improvement/portfolio-hardening). Start with the [recruiter guide](docs/RECRUITER_GUIDE.md) for the interface, or follow the setup below to run it locally.
 
-1. Sign in using an HttpOnly, CSRF-protected session.
-2. Create a job with skills, experience, education and configurable scoring weights.
-3. Upload one or up to ten validated PDF/DOCX resumes.
-4. A separate worker processes persistent tasks and records visible successes/failures.
-5. Review source-line evidence, correct profiles, or replace unreadable documents.
-6. Run job-specific matching and inspect components, skill gaps and stable rankings.
-7. Create applications and record human review notes and stage history.
+## Hiring workflow
+
+**Create a job -> Add resumes -> Check details -> Compare candidates -> Record a decision**
+
+1. Create the role and its requirements. Optionally use skill suggestions, then confirm what the role needs.
+2. Upload one to ten PDF/DOCX resumes. Reading happens in the background, with clear progress and per-file errors.
+3. Check extracted information against the original resume and correct anything inaccurate.
+4. Compare candidates with the selected job, inspect matching/missing skills, and request explanations or interview questions.
+5. Record review notes and application stages. Human checks and current comparisons are required before shortlisting and later steps.
 
 Recruiters see only their own records. CVs use authorized download endpoints. Legacy unowned records are quarantined rather than assigned automatically.
+
+## Recruiter interface
+
+The main navigation is **Home, Jobs and Candidates**. Start from a job, add resumes, check the extracted details, compare candidates and record your decision. Job requirements and matches share one workspace. Candidate details, job comparison, and review/decision each have their own view.
+
+All advanced functionality remains available through **Settings & tools** and expandable details: standalone AI tools, provider diagnostics, processing/retry controls, cross-job rankings, accuracy evaluation, custom weights, source evidence, scoring components, verification, history and technical exports.
+
+System testing now offers a **readable HTML summary** as its main download. It opens in a browser and can be printed/saved as a PDF. The full JSON download and benchmark metrics are retained under Technical benchmark data and metrics. This software test report is separate from reviewing an actual candidate.
+
+| Where | What you can do |
+|---|---|
+| Home | Start a job, upload resumes, or continue work needing attention |
+| Jobs | Manage requirements and candidate matches together |
+| Candidates | Check profiles, compare against a job, and record decisions |
+| Settings & tools | Open processing activity, standalone AI tools, cross-job comparisons and system testing |
+| Expandable details | Inspect evidence, custom priorities, source/model diagnostics, score verification/history and technical exports |
+
+No existing functionality was removed. See the [recruiter walkthrough and complete feature map](docs/RECRUITER_GUIDE.md).
 
 ## Local setup
 
@@ -23,7 +43,7 @@ Requires Python 3.12, PostgreSQL, and Node 22.13+ or Node 24. Use consistent fro
 Windows PowerShell, fresh installation:
 
 ~~~powershell
-git clone https://github.com/NomanWahdat/ai_recruitment_system.git
+git clone --branch improvement/portfolio-hardening https://github.com/NomanWahdat/ai_recruitment_system.git
 cd ai_recruitment_system
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt -c requirements.lock.txt
@@ -39,11 +59,23 @@ npm.cmd --prefix frontend ci --ignore-scripts --no-audit --no-fund
 npm.cmd --prefix frontend run build
 ~~~
 
-Run these in three terminals:
+Run the following in **three separate terminals**, from the project root.
+
+Terminal 1: API
 
 ~~~powershell
 .\.venv\Scripts\python.exe manage.py runserver 127.0.0.1:8000 --noreload
+~~~
+
+Terminal 2: resume-processing worker
+
+~~~powershell
 .\.venv\Scripts\python.exe manage.py process_tasks
+~~~
+
+Terminal 3: frontend
+
+~~~powershell
 npm.cmd --prefix frontend run start -- --hostname 127.0.0.1
 ~~~
 
@@ -74,27 +106,33 @@ See [.env.example](.env.example), [AI setup and local fallback](docs/AI_CONFIGUR
 
 Resolved Python dependency constraints are in requirements.lock.txt. No keys or real resumes belong in Git. Rebuild the frontend after changing its public API URL.
 
+## Verified behavior
+
+The latest local verification passed **112 PostgreSQL tests**, with **86.45% backend statement coverage**, Ruff checks, frontend ESLint with zero warnings, TypeScript, and a production build. The full browser journey passed with zero JavaScript exceptions, using an isolated synthetic account that was removed after testing.
+
+The browser checks cover job editing/priorities, resume uploads and failures, duplicate-file feedback, evidence correction, contextual and standalone AI tools, decisions/history, score verification and exports, readable/technical evaluation downloads, and mobile navigation. See [verification details](docs/VERIFICATION.md) and the [browser report](docs/verification-browser.json). These checks establish behavior, not independent hiring accuracy. Remote CI results and container runtime must be checked separately.
+
 ## Checks
 
 ~~~powershell
-python manage.py test --settings=config.settings.test
+.\.venv\Scripts\python.exe manage.py test --settings=config.settings.test
 $env:TEST_POSTGRES='true'
-python -m coverage run manage.py test --settings=config.settings.test --noinput
-python -m coverage report
-python manage.py makemigrations --check --dry-run
+.\.venv\Scripts\python.exe -m coverage run manage.py test --settings=config.settings.test --noinput
+.\.venv\Scripts\python.exe -m coverage report
+.\.venv\Scripts\python.exe manage.py makemigrations --check --dry-run
 npm.cmd --prefix frontend run lint
 npm.cmd --prefix frontend run typecheck
 npm.cmd --prefix frontend run build
-python tools/evaluate.py --check
-python tools/create_demo_files.py
+.\.venv\Scripts\python.exe tools/evaluate.py --check
+.\.venv\Scripts\python.exe tools/create_demo_files.py
 node tools/browser_e2e.cjs
 ~~~
 
-The browser test requires installed Edge/Chrome; BROWSER_BIN overrides discovery. It drives real forms/uploads and saves a verification report and screenshots.
+The browser test requires installed Edge/Chrome; BROWSER_BIN overrides discovery. It uses an isolated synthetic recruiter account, drives real forms/uploads and saves a verification report and screenshots. It follows configured provider settings, so an AI-enabled local server can make synthetic provider calls; CI uses offline settings. Resume/job fixtures are cleaned up automatically; an empty test account can be removed through administrative tooling.
 
 ## Accuracy evaluation
 
-Open **Evaluation** in the sidebar. This feature compares extracted fields and ranked candidates against labelled examples, shows per-split metrics and actual failure cases, and lets you download the report.
+Open **Settings & tools -> System testing**. This feature compares extracted fields and ranked candidates against labelled examples, shows per-split metrics and actual failure cases, and lets you download the report.
 
 The bundled benchmark has **24 synthetic examples**: 12 regression checks and 12 harder challenge cases. Measured skill F1 is **85.71% overall**, **100% on regressions**, and **69.77% on challenges**; experience MAE is **0.27 years overall**. These values describe this small developer-authored corpus, not independent hiring accuracy. The challenge report exposes false positives from negated skills and quoted requirements.
 
@@ -111,9 +149,9 @@ An explicit `--live-ai` option compares hybrid AI ranking and records real provi
 
 ## Reproducible scoring
 
-Open a candidate, select a job and run matching. The **Reproducible score** section saves the inputs and revisions, local score, actual AI score, requested/applied weights, component ratios, provider/model, versions, timestamp and fingerprint. Each rematch adds an owned history entry.
+Open a candidate, select a job and run matching. The **How this score was calculated** section saves the inputs and revisions, local score, actual AI score, requested/applied weights, component ratios, provider/model, versions, timestamp and fingerprint. Each rematch adds an owned history entry.
 
-Select **Verify saved score** to replay the calculation with **zero AI calls**, **Show score history** to inspect older runs, or **Download score snapshot** to export it. For example, local 75 with AI 80 and AI weight 25% gives `75 * 0.75 + 80 * 0.25 = 76.25`. Provider failure makes the applied AI weight zero. A valid AI score of zero remains valid.
+Select **Verify saved score** to replay the calculation with **zero AI calls**, **Show previous comparisons** to inspect older runs, or **Download technical score data (JSON)** to export it. For example, local 75 with AI 80 and AI weight 25% gives `75 * 0.75 + 80 * 0.25 = 76.25`. Provider failure makes the applied AI weight zero. A valid AI score of zero remains valid.
 
 Saved arithmetic remains reproducible after profile/job/settings changes. This does not guarantee an identical future AI generation or that the evidence is correct. Fingerprints detect accidental changes; they are not digital signatures. Names, contact fields and raw CV text are excluded from snapshots. History follows candidate/job deletion and retention.
 
@@ -144,7 +182,9 @@ Real browser captures using synthetic data. Screenshots demonstrate the interfac
 |---|---|
 | ![Human review](docs/screenshots/06-human-review.png) | ![Unreadable document](docs/screenshots/10-unreadable-resume.png) |
 
-[Evaluation screenshot](docs/screenshots/13-accuracy-evaluation.png) / [reproducible score screenshot](docs/screenshots/14-reproducible-scoring.png).
+[Settings & tools](docs/screenshots/16-settings-tools.png) / [readable summary](docs/screenshots/17-readable-evaluation-summary.png) / [candidate workspace](docs/screenshots/18-candidate-match.png).
+
+[Evaluation details](docs/screenshots/13-accuracy-evaluation.png) / [reproducible score details](docs/screenshots/14-reproducible-scoring.png).
 
 [All captures](docs/screenshots/) and [browser report](docs/verification-browser.json). [Verified live Groq screenshot](docs/screenshots/12-groq-ai-verified.png) and [API evidence](docs/verification-ai-live.json) use synthetic data; provider connectivity is verified separately from output accuracy.
 

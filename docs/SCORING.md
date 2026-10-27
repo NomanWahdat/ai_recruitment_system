@@ -27,12 +27,12 @@ A valid AI score of zero remains zero. If the provider fails or AI scoring is di
 
 ## Use in the application
 
-Open a candidate, select a job and run matching. Each result has a **Reproducible score** section:
+Open a candidate, select a job and run matching. Each result has an expandable **How this score was calculated** section:
 
 1. Inspect the local/AI values, applied weight and saved revisions.
 2. Select **Verify saved score**. The server verifies the fingerprint, recomputes the local total from saved component ratios/weights and replays the final blend.
-3. Select **Download score snapshot** to export the exact saved evidence and arithmetic.
-4. Select **Show score history** to compare earlier runs and verify them individually.
+3. Select **Download technical score data (JSON)** to export the exact saved evidence and arithmetic.
+4. Select **Show previous comparisons** to compare earlier runs and verify them individually.
 
 Verification makes **zero provider requests**. Editing a profile/job or changing server weights cannot change historical arithmetic. A stale analysis may still reproduce correctly: that proves what was previously calculated, not that it is current. The analysis endpoint also returns `is_stale`.
 

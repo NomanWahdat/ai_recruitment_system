@@ -17,7 +17,7 @@ export function Topbar() {
     <div><p className="text-sm text-slate-500">Recruiter workspace</p><h1 className="text-xl font-semibold">{user?.full_name}</h1></div>
     <div className="relative"><input aria-label="Global search" value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search your candidates and jobs" className="w-64 rounded-xl border px-3 py-2" />
       {deferred.length>=2 && <div className="absolute right-0 z-30 mt-2 w-72 rounded-xl border bg-white p-3 shadow-lg">
-        {results.isPending && <p>Searching?</p>}
+        {results.isPending && <p>Searching...</p>}
         {results.isError && <p role="alert">Search unavailable.</p>}
         {results.data?.candidates.map(c=><Link onClick={()=>setSearch("")} className="block rounded p-2 hover:bg-blue-50" key={`c${c.id}`} href={`/candidates/${c.id}`}>{c.full_name}</Link>)}
         {results.data?.jobs.map(j=><Link onClick={()=>setSearch("")} className="block rounded p-2 hover:bg-blue-50" key={`j${j.id}`} href={`/jobs/${j.id}`}>{j.title}</Link>)}

@@ -1,46 +1,36 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getJobById,updateJob,runMatchingEngine } from "@/services/jobService";
-import { errorMessage } from "@/lib/axios";
-import type { Job } from "@/types/domain";
+import { getJobById, updateJob, runMatchingEngine } from "@/services/jobService";
+import { apiClient, errorMessage } from "@/lib/axios";
+import type { Task } from "@/types/domain";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { Modal } from "@/components/ui/Modal";
+import { JobForm } from "@/components/ui/JobForm";
+import { CandidateMatches } from "@/components/ui/CandidateMatches";
+import { HiringSteps } from "@/components/ui/HiringSteps";
 
-function JobEditor({job,done}:{job:Job;done:()=>void}) {
-  const cache=useQueryClient();
-  const [form,setForm]=useState({employment_type:job.employment_type,salary_range:job.salary_range,title:job.title,company_name:job.company_name,location:job.location,description:job.description,
-    required_skills:job.required_skills.join(", "),minimum_experience:String(job.minimum_experience),education_requirement:job.education_requirement});
-  const [weights,setWeights]=useState({skills:job.scoring_weights.skills??0.5,experience:job.scoring_weights.experience??0.3,education:job.scoring_weights.education??0.2});
-  const save=useMutation({mutationFn:()=>updateJob(job.id,{...form,minimum_experience:Number(form.minimum_experience),
-    required_skills:form.required_skills.split(",").map(s=>s.trim()).filter(Boolean),scoring_weights:weights}),
-    onSuccess:()=>{cache.invalidateQueries();done();}});
-  return <form onSubmit={event=>{event.preventDefault();save.mutate();}} className="space-y-4">
-    {Object.entries(form).map(([field,value])=><label key={field} className="block capitalize">{field.replaceAll("_"," ")}
-      {field==="description"?<textarea required value={value} onChange={e=>setForm({...form,[field]:e.target.value})} className="mt-2 w-full rounded border p-3" rows={5}/>:field==="employment_type"?<select value={value} onChange={e=>setForm({...form,[field]:e.target.value})} className="mt-2 w-full rounded border p-3">{["full_time","part_time","contract","internship","remote"].map(type=><option key={type}>{type}</option>)}</select>:<input required={["title","company_name"].includes(field)} value={value} type={field==="minimum_experience"?"number":"text"} min="0" onChange={e=>setForm({...form,[field]:e.target.value})} className="mt-2 w-full rounded border p-3"/>}</label>)}
-    <fieldset className="rounded-xl border p-4"><legend>Scoring weights ? total must equal 1</legend><div className="grid grid-cols-3 gap-3">{Object.entries(weights).map(([field,value])=><label key={field} className="capitalize">{field}<input type="number" min="0" max="1" step="0.05" value={value} onChange={e=>setWeights({...weights,[field]:Number(e.target.value)})} className="mt-2 w-full rounded border p-2"/></label>)}</div></fieldset>
-    {save.isError&&<p role="alert" className="text-rose-700">{errorMessage(save.error)}</p>}
-    <button disabled={save.isPending} className="rounded-xl bg-blue-600 px-4 py-3 text-white">Save job and refresh matches</button>
-  </form>;
-}
 export default function JobDetailPage() {
-  const id=Number(useParams<{id:string}>().id);const [edit,setEdit]=useState(false);const cache=useQueryClient();
-  const query=useQuery({queryKey:["job",id],queryFn:()=>getJobById(id)});
-  const match=useMutation({mutationFn:()=>runMatchingEngine(id),onSuccess:()=>cache.invalidateQueries()});
-  if(query.isPending)return <LoadingSpinner/>;
-  if(query.isError)return <p role="alert">{errorMessage(query.error)}</p>;
-  const job=query.data;
-  return <div className="space-y-6"><div className="flex flex-wrap justify-between gap-3"><div><h2 className="text-3xl font-semibold">{job.title}</h2><p className="mt-2 text-slate-500">{job.company_name} · {job.location}</p></div>
-    <div className="flex flex-wrap gap-3"><button onClick={()=>setEdit(true)} className="rounded-xl border bg-white px-4 py-3">Edit job / criteria</button>
-      <button disabled={match.isPending} onClick={()=>match.mutate()} className="rounded-xl bg-blue-600 px-4 py-3 text-white">Refresh this job?s matches</button></div></div>
-    {match.isSuccess&&<p role="status">Matching queued for this job only. Track progress in Automation.</p>}
-    {match.isError&&<p role="alert">{errorMessage(match.error)}</p>}
-    <section className="rounded-2xl border bg-white p-6"><h3 className="text-xl font-semibold">Requirements</h3><p className="mt-4 whitespace-pre-wrap">{job.description}</p><p className="mt-5">Skills: {job.required_skills.join(", ")||"Not specified"}</p>
-      <p className="mt-3">Minimum experience: {job.minimum_experience} years</p><p className="mt-3">Education: {job.education_requirement||"Not specified"}</p>
-      <p className="mt-3">Weights: {JSON.stringify(job.scoring_weights)} {Object.keys(job.scoring_weights).length?"":"(defaults: skills 0.5, experience 0.3, education 0.2)"}</p></section>
-    <Link href={`/rankings?job=${id}`} className="inline-block rounded-xl bg-blue-50 px-4 py-3 text-blue-800">View current candidate ranking →</Link>
-    <Modal open={edit} title="Edit job requirements" onClose={()=>setEdit(false)}>{edit&&<JobEditor job={job} done={()=>setEdit(false)}/>}</Modal>
+  const id = Number(useParams<{id: string}>().id); const cache = useQueryClient();
+  const [edit,setEdit] = useState(false); const [tab,setTab] = useState("candidates");
+  const query = useQuery({queryKey: ["job", id], queryFn: () => getJobById(id)});
+  const save = useMutation({mutationFn: (data: Record<string, unknown>) => updateJob(id, data), onSuccess: () => {cache.invalidateQueries(); setEdit(false);}});
+  const match = useMutation({mutationFn: () => runMatchingEngine(id)});
+  const progress = useQuery<Task>({queryKey: ["job-matching-task", match.data?.id], queryFn: async () => (await apiClient.get(`/tasks/${match.data.id}/`)).data, enabled: !!match.data?.id, refetchInterval: query => ["completed", "failed"].includes(query.state.data?.status || "") ? false : 2000});
+  useEffect(() => {if (progress.data?.status === "completed") cache.invalidateQueries({queryKey: ["rankings"]});}, [progress.data?.status, cache]);
+  if (query.isPending) return <LoadingSpinner/>;
+  if (query.isError) return <p role="alert">{errorMessage(query.error)}</p>;
+  const job = query.data;
+  const processing = match.isPending || (!!match.data && (!progress.data || ["queued", "running"].includes(progress.data.status)));
+  return <div className="space-y-6"><Link href="/jobs" className="text-sm text-blue-700">Back to jobs</Link><div className="flex flex-wrap items-start justify-between gap-4"><div><h2 className="text-3xl font-semibold">{job.title}</h2><p className="mt-2 text-slate-500">{job.company_name}{job.location ? ` / ${job.location}` : ""}</p></div><Link href={`/candidates?upload=1&job=${id}`} className="rounded-xl bg-blue-600 px-5 py-3 font-medium text-white">Add resumes</Link></div>
+    <HiringSteps current={tab === "requirements" ? 0 : 3}/>
+    <div className="flex flex-wrap gap-2 border-b" aria-label="Job workspace">{[["candidates", "Candidate matches"], ["requirements", "Job requirements"]].map(([value,label]) => <button key={value} aria-pressed={tab === value} onClick={() => setTab(value)} className={`border-b-2 px-4 py-3 text-sm font-medium ${tab === value ? "border-blue-600 text-blue-800" : "border-transparent text-slate-500"}`}>{label}</button>)}</div>
+    {tab === "candidates" ? <section className="space-y-4"><div className="flex flex-wrap items-center justify-between gap-3"><div><h3 className="text-xl font-semibold">Candidate matches</h3><p className="mt-1 text-sm text-slate-500">Scores help you compare requirements; you make the hiring decision.</p></div><button disabled={processing} onClick={() => match.mutate()} className="rounded-xl border bg-white px-4 py-2 text-sm disabled:opacity-50">{processing ? "Updating matches..." : "Update matches"}</button></div>
+      {progress.data && <p role="status" className="rounded-xl bg-blue-50 p-3 text-sm text-blue-900">{progress.data.status === "completed" ? "Your comparisons are up to date." : progress.data.status === "failed" ? "We couldn't finish updating these matches. Open processing activity to try again." : "We're comparing your candidate pool with this job. You can keep working."} <Link href="/automation" className="underline">View progress</Link></p>}
+      {(match.isError || progress.isError) && <p role="alert" className="text-rose-700">{errorMessage(match.error || progress.error)}</p>}<CandidateMatches jobId={id}/>
+    </section> : <section className="space-y-4 rounded-2xl border bg-white p-6"><div className="flex flex-wrap items-center justify-between gap-3"><h3 className="text-xl font-semibold">What this role needs</h3><button onClick={() => setEdit(true)} className="rounded-xl border px-4 py-2 text-sm">Edit requirements</button></div><p className="whitespace-pre-wrap text-sm leading-7 text-slate-600">{job.description}</p><dl className="grid gap-4 sm:grid-cols-2">{[["Required skills",job.required_skills.join(", ") || "Not specified"],["Experience",`${job.minimum_experience} years minimum`],["Education",job.education_requirement || "Not specified"]].map(([label,value]) => <div key={label} className="rounded-xl bg-slate-50 p-4"><dt className="text-sm font-semibold">{label}</dt><dd className="mt-2 text-sm text-slate-600">{value}</dd></div>)}</dl><details className="text-sm"><summary className="cursor-pointer">Additional details and matching priorities</summary><p className="mt-3">Employment: {job.employment_type.replaceAll("_", " ")}. Salary: {job.salary_range || "Not specified"}.</p><p className="mt-2">Priorities: {Object.keys(job.scoring_weights).length ? Object.entries(job.scoring_weights).map(([name,value]) => `${name} ${Math.round(value * 100)}%`).join(", ") : "Default matching priorities"}.</p><p className="mt-2 text-xs text-slate-500">Changing requirements makes older comparisons out of date and schedules new comparisons.</p></details></section>}
+    <Modal open={edit} title="Edit job requirements" onClose={() => setEdit(false)}>{edit && <JobForm job={job} onSave={data => save.mutate(data)} pending={save.isPending} error={save.error}/>}</Modal>
   </div>;
 }

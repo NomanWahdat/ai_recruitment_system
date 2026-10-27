@@ -2,7 +2,7 @@
 
 The evaluation feature measures extraction errors and ranking agreement against supplied labels. It provides a repeatable way to find limitations and compare changes. It does not certify suitability for employment decisions.
 
-Open **Evaluation** in the application to inspect the bundled benchmark, switch between splits, compare baselines, review failure cases and download its report. The authenticated `/api/evaluation/` endpoint serves only the complete bundled offline report. A mismatched dataset fingerprint returns 503 instead of silently presenting stale results. Custom/private reports are not published through this endpoint.
+Open **Settings & tools -> System testing** in the application to inspect the bundled benchmark, switch between splits, compare baselines, review failure cases and download its report. The authenticated `/api/evaluation/` endpoint serves only the complete bundled offline report. A mismatched dataset fingerprint returns 503 instead of silently presenting stale results. Custom/private reports are not published through this endpoint.
 
 ## Current dataset and results
 
@@ -95,3 +95,5 @@ The default is always offline. Live mode sends only scoring fields (skills, expe
 Education equivalency, OCR, language generalization, demographic fairness, provider costs and real-world hiring outcomes remain unestablished. Saved AI outputs reproduce arithmetic, not identical future model generations. Read [reproducible scoring](SCORING.md) for the audit boundary.
 
 [Evaluation screenshot](screenshots/13-accuracy-evaluation.png). Focused browser reproduction: set `EVIDENCE_ONLY=1` and run `node tools/browser_e2e.cjs` against a running synthetic demo. This check performs two matches and can invoke configured providers.
+
+The main interface provides a plain-language summary and Download readable summary (HTML, printable to PDF). Technical benchmark data and metrics retains the full JSON download and every existing metric/filter. See the [recruiter guide](RECRUITER_GUIDE.md).

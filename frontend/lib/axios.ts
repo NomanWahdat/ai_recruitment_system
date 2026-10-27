@@ -23,10 +23,16 @@ apiClient.interceptors.response.use(response => {
   }
   return Promise.reject(error);
 });
+export function validationMessage(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) return value.map(validationMessage).filter(Boolean).join(" ");
+  if (value && typeof value === "object") return Object.entries(value).map(([key,item]) => {
+    const text = validationMessage(item);
+    return key === "detail" || key === "non_field_errors" ? text : `${key.replaceAll("_", " ")}: ${text}`;
+  }).join(" ");
+  return "";
+}
 export function errorMessage(error: unknown): string {
-  if (axios.isAxiosError(error)) {
-    const data = error.response?.data;
-    return data?.detail || (data ? JSON.stringify(data) : "Cannot reach the API. Check the connection.");
-  }
-  return error instanceof Error ? error.message : "Request failed.";
+  if (axios.isAxiosError(error)) return validationMessage(error.response?.data) || "We couldn't reach the service. Please check your connection and try again.";
+  return error instanceof Error ? error.message : "Something went wrong. Please try again.";
 }

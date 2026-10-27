@@ -1,5 +1,6 @@
 "use client";
 
+import { AdvancedPageLink } from "@/components/ui/HiringSteps";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { listCandidates } from "@/services/candidateService";
@@ -30,10 +31,10 @@ export default function AIToolsPage() {
   useEffect(() => {
     const candidates = Array.isArray(candidatesQuery.data) ? candidatesQuery.data : [];
     const jobs = Array.isArray(jobsQuery.data) ? jobsQuery.data : [];
-    if (!explainCandidateId && candidates.length) setExplainCandidateId(candidates[0].id);
-    if (!interviewCandidateId && candidates.length) setInterviewCandidateId(candidates[0].id);
-    if (!explainJobId && jobs.length) setExplainJobId(jobs[0].id);
-    if (!interviewJobId && jobs.length) setInterviewJobId(jobs[0].id);
+    if (!candidates.some(candidate => candidate.id === explainCandidateId)) setExplainCandidateId(candidates[0]?.id || "");
+    if (!candidates.some(candidate => candidate.id === interviewCandidateId)) setInterviewCandidateId(candidates[0]?.id || "");
+    if (!jobs.some(job => job.id === explainJobId)) setExplainJobId(jobs[0]?.id || "");
+    if (!jobs.some(job => job.id === interviewJobId)) setInterviewJobId(jobs[0]?.id || "");
   }, [candidatesQuery.data, jobsQuery.data, explainCandidateId, explainJobId, interviewCandidateId, interviewJobId]);
 
   const parseMutation = useMutation({
@@ -49,7 +50,7 @@ export default function AIToolsPage() {
     mutationFn: () => getMatchExplanation(Number(explainCandidateId), Number(explainJobId)),
     onSuccess: (data) => {
       setMatchExplanation(data);
-      pushToast({ title: "Match explanation ready", description: data.response_source === "local" ? "Local rubric explanation generated." : "AI explanation generated.", type: "success" });
+      pushToast({ title: "Match explanation ready", description: data.response_source === "local" ? "Standard explanation generated." : "AI explanation generated.", type: "success" });
     },
     onError: () => pushToast({ title: "Explanation failed", description: "Unable to explain the match.", type: "error" }),
   });
@@ -69,13 +70,13 @@ export default function AIToolsPage() {
   const jobs = Array.isArray(jobsQuery.data) ? jobsQuery.data : [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6"><AdvancedPageLink/>
       <div>
-        <h2 className="text-2xl font-semibold text-slate-950">AI Tools</h2>
-        <p className="mt-2 text-sm text-slate-500">Generate job insights, match explanations, and interview questions.</p>
+        <h2 className="text-2xl font-semibold text-slate-950">AI assistant tools</h2>
+        <p className="mt-2 text-sm text-slate-500">Standalone tools for extra help. You can also use these actions while editing a job or reviewing a candidate.</p>
       </div>
 
-      <section aria-label="AI connection" className="rounded-3xl border border-slate-200 bg-white p-6">
+      <details aria-label="AI connection" className="rounded-3xl border border-slate-200 bg-white p-6"><summary className="cursor-pointer font-semibold">Connection settings and diagnostics</summary><div className="mt-4">
         <h3 className="font-semibold text-slate-950">AI connection</h3>
         {providerQuery.isPending && <p className="mt-2 text-sm">Checking configuration...</p>}
         {providerQuery.isError && <p role="alert" className="mt-2 text-sm text-red-700">Unable to load AI configuration. Check the API connection.</p>}
@@ -97,30 +98,30 @@ export default function AIToolsPage() {
           <ResponseSourceBadge source={connectionTest.data.response_source} model={connectionTest.data.model} reason={connectionTest.data.fallback_reason} />
         </div>}
         {connectionTest.isError && <p role="alert" className="mt-3 text-sm text-red-700">Unable to complete the test. Check the API connection or try again later.</p>}
-      </section>
+      </div></details>
 
       <div className="flex flex-wrap gap-3"><input aria-label="Filter AI tool candidates" placeholder="Find candidate" value={candidateSearch} onChange={e=>setCandidateSearch(e.target.value)} className="rounded-xl border p-3"/><input aria-label="Filter AI tool jobs" placeholder="Find job" value={jobSearch} onChange={e=>setJobSearch(e.target.value)} className="rounded-xl border p-3"/></div>
       <div className="grid gap-6 xl:grid-cols-3">
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">
           <div className="text-lg font-semibold text-slate-950">Job Parser</div>
           <textarea value={jobDescription} onChange={(event) => setJobDescription(event.target.value)} rows={8} placeholder="Paste a job description" className="mt-4 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm leading-6" />
-          <button onClick={() => parseMutation.mutate(jobDescription)} className="mt-4 rounded-2xl bg-blue-600 px-4 py-2 text-sm font-medium text-white">
+          <button disabled={!jobDescription.trim() || parseMutation.isPending} onClick={() => parseMutation.mutate(jobDescription)} className="mt-4 rounded-2xl bg-blue-600 px-4 py-2 text-sm font-medium text-white">
             Parse Job
           </button>
           {jobParseResult && <div className="mt-3"><ResponseSourceBadge source={jobParseResult?.response_source} model={jobParseResult?.model} reason={jobParseResult?.fallback_reason} /></div>}
-          <pre className="mt-4 overflow-auto rounded-2xl bg-slate-50 p-4 text-xs leading-6 text-slate-600">{jobParseResult ? JSON.stringify({skills: jobParseResult.skills, role_type: jobParseResult.role_type, experience_level: jobParseResult.experience_level, summary: jobParseResult.summary}, null, 2) : "No parsed output yet."}</pre>
+          {jobParseResult ? <div className="mt-4 space-y-3 text-sm"><p><strong>Skills: </strong>{jobParseResult.skills.join(", ") || "None found"}</p><p><strong>Role: </strong>{jobParseResult.role_type}</p><p><strong>Experience: </strong>{jobParseResult.experience_level}</p><p>{jobParseResult.summary}</p><details><summary className="cursor-pointer">Technical result (JSON)</summary><pre className="mt-2 overflow-auto text-xs">{JSON.stringify(jobParseResult, null, 2)}</pre></details></div> : <p className="mt-4 text-sm text-slate-500">Paste a description to see suggested requirements.</p>}
         </section>
 
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">
           <div className="text-lg font-semibold text-slate-950">Match Explainer</div>
           <div className="mt-4 space-y-4">
-            <select value={explainCandidateId} onChange={(event) => setExplainCandidateId(Number(event.target.value))} className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm">
+            <select aria-label="Candidate for explanation" value={explainCandidateId} onChange={(event) => setExplainCandidateId(Number(event.target.value))} className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm">
               {candidates.map((candidate: any) => <option key={candidate.id} value={candidate.id}>{candidate.full_name}</option>)}
             </select>
-            <select value={explainJobId} onChange={(event) => setExplainJobId(Number(event.target.value))} className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm">
+            <select aria-label="Job for explanation" value={explainJobId} onChange={(event) => setExplainJobId(Number(event.target.value))} className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm">
               {jobs.map((job: any) => <option key={job.id} value={job.id}>{job.title}</option>)}
             </select>
-            <button onClick={() => explanationMutation.mutate()} className="rounded-2xl bg-blue-600 px-4 py-2 text-sm font-medium text-white">
+            <button disabled={!explainCandidateId || !explainJobId || explanationMutation.isPending} onClick={() => explanationMutation.mutate()} className="rounded-2xl bg-blue-600 px-4 py-2 text-sm font-medium text-white">
               Explain Match
             </button>
           </div>
@@ -136,13 +137,13 @@ export default function AIToolsPage() {
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">
           <div className="text-lg font-semibold text-slate-950">Interview Generator</div>
           <div className="mt-4 space-y-4">
-            <select value={interviewCandidateId} onChange={(event) => setInterviewCandidateId(Number(event.target.value))} className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm">
+            <select aria-label="Candidate for interview" value={interviewCandidateId} onChange={(event) => setInterviewCandidateId(Number(event.target.value))} className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm">
               {candidates.map((candidate: any) => <option key={candidate.id} value={candidate.id}>{candidate.full_name}</option>)}
             </select>
-            <select value={interviewJobId} onChange={(event) => setInterviewJobId(Number(event.target.value))} className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm">
+            <select aria-label="Job for interview" value={interviewJobId} onChange={(event) => setInterviewJobId(Number(event.target.value))} className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm">
               {jobs.map((job: any) => <option key={job.id} value={job.id}>{job.title}</option>)}
             </select>
-            <button onClick={() => interviewMutation.mutate()} className="rounded-2xl bg-blue-600 px-4 py-2 text-sm font-medium text-white">
+            <button disabled={!interviewCandidateId || !interviewJobId || interviewMutation.isPending} onClick={() => interviewMutation.mutate()} className="rounded-2xl bg-blue-600 px-4 py-2 text-sm font-medium text-white">
               Generate Questions
             </button>
           </div>

@@ -39,8 +39,8 @@ export function SignUpForm({ onSwitch }: { onSwitch: () => void }) {
         <div className="inline-block rounded-xl bg-gradient-to-br from-blue-100 to-blue-50 px-4 py-2">
           <span className="text-xs font-bold uppercase tracking-widest text-blue-700">🚀 AI Recruitment</span>
         </div>
-        <h1 className="mt-4 text-4xl font-bold tracking-tight text-slate-900">Join the revolution</h1>
-        <p className="mt-2 text-base text-slate-600">Get started with AI-powered recruitment in minutes</p>
+        <h1 className="mt-4 text-4xl font-bold tracking-tight text-slate-900">Create your account</h1>
+        <p className="mt-2 text-base text-slate-600">Start your private hiring workspace</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">

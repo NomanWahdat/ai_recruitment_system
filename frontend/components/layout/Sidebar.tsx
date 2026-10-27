@@ -1,57 +1,16 @@
 "use client";
-
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, Bot, BriefcaseBusiness, LayoutDashboard, Users, Wand2 } from "lucide-react";
-
-const navigation = [
-  { label: "Dashboard", href: "/", icon: LayoutDashboard },
-  { label: "Candidates", href: "/candidates", icon: Users },
-  { label: "Jobs", href: "/jobs", icon: BriefcaseBusiness },
-  { label: "Rankings", href: "/rankings", icon: BarChart3 },
-  { label: "Evaluation", href: "/evaluation", icon: BarChart3 },
-  { label: "AI Tools", href: "/ai-tools", icon: Wand2 },
-  { label: "Automation", href: "/automation", icon: Bot },
-];
+import { mainNavigation, settingsNavigation, navigationActive } from "./navigation";
 
 export function Sidebar() {
   const pathname = usePathname();
-
-  return (
-    <aside className="flex h-full w-72 flex-col border-r border-slate-200 bg-white/90 px-5 py-6 backdrop-blur">
-      <div className="mb-8">
-        <div className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-600">AI Recruitment</div>
-        <div className="mt-2 text-xl font-semibold text-slate-900">Command Center</div>
-        <p className="mt-2 text-sm leading-6 text-slate-500">
-          Automated screening, matching, ranking, and AI workflows in one dashboard.
-        </p>
-      </div>
-
-      <nav className="space-y-2">
-        {navigation.map((item) => {
-          const Icon = item.icon;
-          const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition ${
-                active
-                  ? "bg-blue-600 text-white shadow-soft"
-                  : "text-slate-600 hover:bg-blue-50 hover:text-blue-700"
-              }`}
-            >
-              <Icon className="h-4 w-4" />
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
-
-      <div className="mt-auto rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50 p-4 shadow-sm">
-        <div className="text-sm font-semibold text-slate-900">System Status</div>
-        <p className="mt-1 text-sm text-slate-600">Private recruiter workspace. Review evidence before decisions.</p>
-      </div>
-    </aside>
-  );
+  return <aside className="flex h-full w-64 flex-col border-r border-slate-200 bg-white px-5 py-7">
+    <Link href="/" className="mb-9 block"><span className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600">AI Recruitment</span><span className="mt-2 block text-xl font-semibold text-slate-950">Hiring workspace</span><span className="mt-2 block text-sm leading-6 text-slate-500">Find the right evidence.<br/>Make your own decisions.</span></Link>
+    <nav aria-label="Main navigation" className="space-y-2">{mainNavigation.map(item => {
+      const Icon = item.icon; const active = navigationActive(pathname, item.href);
+      return <Link key={item.href} href={item.href} aria-current={active ? "page" : undefined} className={`flex items-center gap-3 rounded-xl px-4 py-3 font-medium ${active ? "bg-blue-600 text-white" : "text-slate-600 hover:bg-slate-50"}`}><Icon aria-hidden="true" className="h-5 w-5"/>{item.label}</Link>;
+    })}</nav>
+    <div className="mt-auto space-y-5 pt-8"><Link href={settingsNavigation.href} aria-current={navigationActive(pathname, settingsNavigation.href) ? "page" : undefined} className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium ${navigationActive(pathname, settingsNavigation.href) ? "bg-blue-50 text-blue-800" : "text-slate-600 hover:bg-slate-50"}`}><settingsNavigation.icon aria-hidden="true" className="h-5 w-5"/>{settingsNavigation.label}</Link><p className="px-4 text-xs leading-5 text-slate-500">Your resumes are private.<br/>Always check details before deciding.</p></div>
+  </aside>;
 }

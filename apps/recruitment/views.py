@@ -342,11 +342,12 @@ class ApplicationViewSet(ModelViewSet):
             .select_related("job", "candidate", "reviewer")
             .prefetch_related("decisions")
         )
-        if "candidate" in self.request.query_params:
-            try:
-                qs = qs.filter(candidate_id=int(self.request.query_params["candidate"]))
-            except ValueError:
-                raise ValidationError("Invalid candidate ID.")
+        for field in ["candidate", "job"]:
+            if field in self.request.query_params:
+                try:
+                    qs = qs.filter(**{field + "_id": int(self.request.query_params[field])})
+                except ValueError:
+                    raise ValidationError("Invalid application resource ID.")
         return qs
 
     @transaction.atomic

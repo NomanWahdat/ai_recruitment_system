@@ -1,28 +1,41 @@
 {
-  "started_at": "2026-10-26T18:18:37.008Z",
+  "started_at": "2026-10-27T17:14:05.451Z",
   "steps": [
-    "Sign-in form establishes an HttpOnly session and loads dashboard data",
-    "Job creation form persists owned requirements",
-    "Bulk upload queues real files; worker extracts DOCX and reports unreadable PDF failure",
-    "Recruiter corrects evidence and matching records the revised profile",
-    "Human review transitions applied -> review -> shortlisted with durable notes",
-    "Missing provider configuration yields a truthful local fallback",
-    "Mobile navigation is available"
+    "Recruiter authentication opens the guided hiring workspace",
+    "Simple main navigation retains every advanced tool through Settings & tools",
+    "Job form provides readable AI suggestions and retains editing, employment details and custom priorities",
+    "Contextual bulk uploads, background extraction, unreadable-file failure and duplicate validation remain understandable",
+    "Candidate tabs preserve original evidence, profile correction, job-specific matching and contextual AI explanations/interviews",
+    "Human application stages and durable decision notes remain separate from advisory scores",
+    "Standalone AI tools, connection diagnostics and truthful AI/standard source labels remain available",
+    "Evaluation provides a readable HTML download while retaining full JSON, split metrics and failure cases",
+    "Expandable score details preserve verification with zero AI calls, previous comparisons and exact JSON export",
+    "Processing retries, bulk refresh tools, private downloads and resume replacement remain available",
+    "Mobile navigation stays compact with all advanced tools accessible"
   ],
   "screenshots": [
     "01-sign-in.png",
     "02-dashboard.png",
+    "16-settings-tools.png",
     "03-jobs.png",
     "04-candidates.png",
     "05-candidate-evidence.png",
+    "18-candidate-match.png",
     "06-human-review.png",
     "07-rankings.png",
-    "08-ai-tools.png",
+    "12-groq-ai-verified.png",
+    "17-readable-evaluation-summary.png",
+    "13-accuracy-evaluation.png",
+    "14-reproducible-scoring.png",
     "09-automation-failure.png",
     "10-unreadable-resume.png",
     "11-mobile-dashboard.png"
   ],
   "errors": [],
+  "synthetic_account": "ui_check_1793121245452",
   "passed": true,
-  "finished_at": "2026-10-26T18:19:05.988Z"
+  "fixture_cleanup": true,
+  "finished_at": "2026-10-27T17:14:57.311Z",
+  "ui_version": "recruiter-workflow-v1",
+  "synthetic_account_removed": true
 }

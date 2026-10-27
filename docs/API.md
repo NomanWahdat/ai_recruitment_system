@@ -96,7 +96,7 @@ Transitions: applied -> review/rejected; review -> shortlisted/rejected; shortli
 
 Collections return {"count":42,"next":"...","previous":null,"results":[...]}, with 20 items per page and a page parameter.
 
-Jobs: search, title/created_at ordering. Candidates: search, processing_status, min_experience, max_experience, supported ordering. Analyses: job/candidate IDs. Applications: candidate ID. Candidate summaries omit raw text/evidence; detail includes them.
+Jobs: search, title/created_at ordering. Candidates: search, processing_status, min_experience, max_experience, supported ordering. Analyses: job/candidate IDs. Applications: candidate and/or job ID. Candidate summaries omit raw text/evidence; detail includes them.
 
 400 invalid input/file/transition; 401 absent/expired authentication; 403 CSRF; 404 absent/inaccessible; 405 unsupported mutation; 409 duplicate registration; 429 throttling. Duplicate resumes are validation errors. Bulk 202/207 responses report queued records and per-file failures, not completed extraction.
 

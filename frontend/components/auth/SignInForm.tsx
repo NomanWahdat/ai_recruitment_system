@@ -31,7 +31,7 @@ export function SignInForm({ onSwitch }: { onSwitch: () => void }) {
           <span className="text-xs font-bold uppercase tracking-widest text-blue-700">🚀 AI Recruitment</span>
         </div>
         <h1 className="mt-4 text-4xl font-bold tracking-tight text-slate-900">Welcome back</h1>
-        <p className="mt-2 text-base text-slate-600">Continue to manage your recruitment workflow</p>
+        <p className="mt-2 text-base text-slate-600">Sign in to your hiring workspace</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">

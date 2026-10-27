@@ -6,44 +6,22 @@ import type { Dashboard } from "@/types/domain";
 import { StatCard } from "@/components/ui/StatCard";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { ScoreBar } from "@/components/ui/ScoreBar";
+import { HiringSteps } from "@/components/ui/HiringSteps";
 
 export default function DashboardPage() {
-  const query = useQuery({queryKey:["dashboard"], queryFn:async () => (await apiClient.get<Dashboard>("/dashboard/")).data,refetchInterval:10000});
-  if (query.isPending) return <LoadingSpinner />;
-  if (query.isError) return <p role="alert">Unable to load dashboard. Check the API connection.</p>;
+  const query = useQuery({queryKey: ["dashboard"], queryFn: async () => (await apiClient.get<Dashboard>("/dashboard/")).data, refetchInterval: 10000});
+  if (query.isPending) return <LoadingSpinner/>;
+  if (query.isError) return <p role="alert">We couldn&apos;t load your workspace. Please try again.</p>;
   const data = query.data;
-  return <div className="space-y-8">
-    <section className="rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-700 p-8 text-white">
-      <p className="text-sm uppercase tracking-widest">Recruiter workspace</p>
-      <h2 className="mt-3 text-3xl font-semibold">Evidence before decisions</h2>
-      <p className="mt-3 max-w-2xl">Review resume evidence, compare job-specific criteria, and record your own hiring decisions. Matching scores are advisory.</p>
-    </section>
-    <div className="grid gap-4 md:grid-cols-4">
-      <StatCard label="Candidates" value={data.candidates} helper="Your private candidate pool" />
-      <StatCard label="Jobs" value={data.jobs} helper="Your job requirements" />
-      <StatCard label="Current matches" value={data.scores.total} helper="Excludes stale results" />
-      <StatCard label="Average score" value={`${Math.round(data.scores.average || 0)}%`} helper="Rubric score, not hiring probability" />
-    </div>
-    <div className="grid gap-6 xl:grid-cols-3">
-      <section className="rounded-3xl border bg-white p-6 xl:col-span-2">
-        <h3 className="text-lg font-semibold">Audit activity</h3>
-        <p className="mt-1 text-sm text-slate-500">Persisted actions; timestamps show when they occurred.</p>
-        <div className="mt-5 space-y-3">{data.events.map(event => <div key={event.id} className="rounded-xl bg-slate-50 p-4">
-          <p className="font-medium">{event.action.replaceAll(".", " ")}</p>
-          <p className="text-sm text-slate-500">{event.target_type} #{event.target_id} · {new Date(event.created_at).toLocaleString()}</p>
-        </div>)}{!data.events.length && <p>No activity yet. Create a job and upload a CV.</p>}</div>
-      </section>
-      <div className="space-y-6">
-        <section className="rounded-3xl border bg-white p-6"><h3 className="font-semibold">Match distribution</h3>
-          {(["high","medium","low"] as const).map(bucket => <div key={bucket} className="mt-4"><p className="mb-2 capitalize">{bucket}: {data.scores[bucket]} / {data.scores.total}</p>
-            <ScoreBar value={data.scores.total ? data.scores[bucket] / data.scores.total * 100 : 0} /></div>)}
-        </section>
-        <section className="rounded-3xl border bg-white p-6"><h3 className="font-semibold">Processing health</h3>
-          <p className="mt-3">{data.worker_online ? "Worker heartbeat received" : "No recent worker heartbeat"}</p>
-          <p className="mt-2 text-sm">{data.queued} queued · {data.failed} failed</p>
-          <Link href="/automation" className="mt-4 inline-block text-blue-700">Inspect tasks and retry →</Link>
-        </section>
-      </div>
-    </div>
+  return <div className="space-y-6">
+    <section className="rounded-3xl bg-blue-700 p-6 text-white sm:p-8"><p className="text-sm text-blue-100">Your hiring workspace</p><h2 className="mt-2 text-3xl font-semibold">Let&apos;s find your next candidate</h2><p className="mt-3 max-w-2xl leading-7 text-blue-50">Start with a job, add resumes, and check the details. We help you compare; you make the decision.</p><div className="mt-6 flex flex-wrap gap-3"><Link href="/jobs?new=1" className="rounded-xl bg-white px-5 py-3 text-sm font-semibold text-blue-800">Create a job</Link><Link href="/candidates?upload=1" className="rounded-xl border border-blue-300 px-5 py-3 text-sm font-medium">Upload resumes</Link></div></section>
+    <HiringSteps/>
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"><StatCard label="Your jobs" value={data.jobs} helper="Roles you are recruiting for"/><StatCard label="Candidates" value={data.candidates} helper="Your private candidate pool"/><StatCard label="Current comparisons" value={data.scores.total} helper="Based on the latest saved details"/><StatCard label="Resumes in progress" value={data.queued} helper="You can keep working while we process them"/></div>
+    <section className="rounded-2xl border bg-white p-6"><h3 className="text-lg font-semibold">What would you like to do?</h3><div className="mt-5 grid gap-4 md:grid-cols-3">{[
+      ["/jobs", "Continue hiring", "Open a job to compare candidates and review its requirements."],
+      ["/candidates", "Check candidate details", "Review extracted information against the original resume."],
+      ["/automation", data.failed ? `${data.failed} processing issues need attention` : "Check resume progress", data.failed ? "See which files need a clearer copy or another attempt." : "View reading progress and completed uploads."],
+    ].map(([href,title,description]) => <Link key={href} href={href} className="rounded-xl border p-5 hover:border-blue-300"><h4 className="font-semibold text-blue-800">{title}</h4><p className="mt-2 text-sm leading-6 text-slate-600">{description}</p></Link>)}</div>{!data.worker_online && data.queued > 0 && <p role="status" className="mt-4 text-sm text-amber-800">Resume processing is temporarily unavailable. Your uploads are saved; check processing activity for updates.</p>}</section>
+    <details className="rounded-2xl border bg-white p-6"><summary className="cursor-pointer font-semibold">Recent activity and comparison overview</summary><div className="mt-5 grid gap-6 xl:grid-cols-2"><div className="space-y-3">{data.events.map(event => <div key={event.id} className="rounded-xl bg-slate-50 p-4"><p className="text-sm font-medium">{event.action.replaceAll(".", " ").replaceAll("_", " ")}</p><p className="mt-1 text-xs text-slate-500">{new Date(event.created_at).toLocaleString()}</p><details className="mt-2 text-xs text-slate-500"><summary>Activity details</summary>{event.target_type} #{event.target_id}</details></div>)}{!data.events.length && <p className="text-sm">Your activity will appear here after you create a job or upload a resume.</p>}</div><div><p className="text-sm text-slate-600">Average comparison score: {Math.round(data.scores.average || 0)} / 100. Scores support your review.</p>{(["high", "medium", "low"] as const).map(bucket => <div key={bucket} className="mt-4"><p className="mb-2 text-sm capitalize">{bucket}: {data.scores[bucket]}</p><ScoreBar value={data.scores.total ? data.scores[bucket] / data.scores.total * 100 : 0}/></div>)}<Link href="/settings" className="mt-5 inline-block text-sm text-blue-700">System tools and testing</Link></div></div></details>
   </div>;
 }

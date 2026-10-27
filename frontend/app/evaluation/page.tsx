@@ -4,7 +4,9 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getEvaluation } from "@/services/analysisService";
 import { errorMessage } from "@/lib/axios";
-import { downloadJson } from "@/lib/download";
+import { AdvancedPageLink } from "@/components/ui/HiringSteps";
+import { failureDescription } from "@/lib/evaluationSummary";
+import { downloadEvaluationSummary, downloadJson } from "@/lib/download";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 const percent = (value: number) => `${(value * 100).toFixed(1)}%`;
@@ -17,15 +19,17 @@ export default function EvaluationPage() {
   const report = query.data;
   const group = split === "all" ? report : report.by_split[split];
   const failures = report.failure_cases.filter(row => split === "all" || row.split === split);
-  return <div className="space-y-6">
+  return <div className="space-y-6"><AdvancedPageLink/>
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <div><h2 className="text-2xl font-semibold">Accuracy evaluation</h2><p className="mt-2 text-sm text-slate-600">Measure extraction errors and compare ranking methods on labelled examples.</p></div>
-      <button onClick={() => downloadJson("evaluation-report.json", report)} className="rounded-xl border bg-white px-4 py-3">Download evaluation report</button>
+      <div><h2 className="text-2xl font-semibold">System testing</h2><p className="mt-2 text-sm text-slate-600">Understand how the software performed on fictional test resumes. This is not a report about your candidates.</p></div>
+      <button onClick={() => downloadEvaluationSummary(report)} className="rounded-xl bg-blue-600 px-4 py-3 text-white">Download readable summary</button>
     </div>
     <div role="note" className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
       <p className="font-semibold">Synthetic benchmark, not independent hiring evidence.</p>
       <p className="mt-2">The labels were authored with the project. Challenge cases expose known limitations. Independent recruiter labels and representative resumes are still needed to measure real-world accuracy.</p>
     </div>
+    <section className="space-y-4 rounded-2xl border bg-white p-6"><h3 className="text-lg font-semibold">What this means for a recruiter</h3><p className="text-sm leading-7 text-slate-600">We tested {report.records} fictional examples. {report.failure_cases.length} examples revealed reading errors. Basic wording worked well, but negative statements and unusual experience wording need careful checking.</p><ul className="list-disc space-y-2 pl-5 text-sm text-slate-600">{report.failure_cases.map(row => <li key={row.id}>{failureDescription(row.id)}</li>)}</ul><p className="rounded-xl bg-blue-50 p-4 text-sm text-blue-900">Always compare the extracted details with the original resume. These tests use the built-in reading and matching rules; they do not test live AI responses or establish real-world hiring accuracy.</p><p className="text-xs text-slate-500">The readable download is an HTML document you can open in a browser and print or save as a PDF. Technical users can still download the complete JSON below.</p></section>
+    <details className="rounded-2xl border bg-white p-5"><summary className="cursor-pointer font-semibold">Technical benchmark data and metrics</summary><div className="mt-5 space-y-6"><p className="text-sm text-slate-600">For developers and technical reviewers: split metrics, ranking comparisons, failure records and reproducibility details.</p><button onClick={() => downloadJson("evaluation-report.json", report)} className="rounded-xl border bg-white px-4 py-3 text-sm">Download technical data (JSON)</button>
     <section className="rounded-2xl border bg-white p-5">
       <label className="text-sm font-medium">Dataset split <select aria-label="Evaluation split" value={split} onChange={event => setSplit(event.target.value)} className="ml-3 rounded-lg border p-2"><option value="all">All examples</option>{Object.keys(report.by_split).map(name => <option key={name} value={name}>{name}</option>)}</select></label>
       <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -51,5 +55,6 @@ export default function EvaluationPage() {
       <ul className="list-disc space-y-1 pl-5 text-sm text-slate-600">{report.limitations.map(text => <li key={text}>{text}</li>)}</ul>
       <details><summary className="cursor-pointer text-sm">Dataset and implementation fingerprints</summary><p className="mt-2 break-all font-mono text-xs">Dataset: {report.dataset_sha256}<br/>Implementation: {report.implementation_sha256}</p></details>
     </section>
+    </div></details>
   </div>;
 }

@@ -49,3 +49,14 @@ The focused browser check verified split filters, seven measured challenge failu
 The default offline benchmark processed 24 developer-authored synthetic examples with zero provider calls. Overall skill F1 was 0.8571 and experience MAE 0.2708 years; challenge F1 was 0.6977. The original regression split remained at F1 1.0. These are measured corpus results, not independently established hiring accuracy.
 
 A separate [live evaluation smoke report](evaluation-live-smoke.json) contains two synthetic examples and four validated Groq scores. That verifies the optional live evaluation path; its tiny sample is not a quality benchmark. No independent dataset, independent human agreement, demographic fairness or real hiring outcomes are claimed. The API/worker/frontend remain running locally with the migrated schema and rebuilt screens.
+
+
+## Recruiter interface simplification, 2026-10-27
+
+The main navigation is now Home, Jobs and Candidates, with Settings & tools retaining standalone AI, processing controls, cross-job rankings and system testing. Job and candidate workspaces group the existing features around the hiring flow. A readable HTML evaluation summary is the main report download; complete JSON and metrics remain in an expandable technical section. No scoring, ownership, retention or human-decision rules were removed.
+
+Validation: **112 PostgreSQL tests passed**, backend statement coverage **86.45%**, Ruff checks/format, frontend ESLint with zero warnings, TypeScript and the final production build passed. A small owner-scoped application job filter supports the contextual candidate review and has regression tests.
+
+The updated full browser workflow passed with zero JavaScript exceptions. It used a newly registered synthetic account, then removed its resumes/jobs and the empty account. Existing recruiter records were not used or changed. The flow verified custom job priorities, AI skill suggestions, bulk reading/failure, readable duplicate errors, evidence/profile correction, inline and standalone AI tools, human application decisions/history, saved-score verification/history/export, readable HTML and complete JSON reports, technical metrics, processing/replacement controls and mobile navigation. Comparison actions are disabled while an update is active.
+
+See [the latest browser report](verification-browser.json), [feature verification](verification-recruiter-interface.json), [recruiter guide and preservation map](RECRUITER_GUIDE.md), [Settings & tools](screenshots/16-settings-tools.png) and [readable summary](screenshots/17-readable-evaluation-summary.png). No independent recruitment-accuracy claim is added by this interface change.

@@ -77,4 +77,4 @@ $env:LIVE_AI='1'
 node tools/browser_e2e.cjs
 ```
 
-The full regression browser workflow expects offline providers. Use CI/test configuration with provider flags disabled for that run; do not overwrite a working private key to simulate failure. Initial offline evidence is preserved separately from the live browser report.
+The full browser workflow uses an isolated synthetic account and follows the configured provider settings; it can make live scoring/assistant calls when AI is enabled. CI disables providers for offline regression checks. Focused AI checks require LIVE_AI=1 when a provider is configured. Do not overwrite a working private key to simulate failure. Initial offline evidence is preserved separately from the live browser report.

@@ -18,3 +18,9 @@ These images were captured from the real application using synthetic data by too
 
 13. [Accuracy evaluation, split metrics and measured failures](13-accuracy-evaluation.png)
 14. [Reproducible scoring, verification and history](14-reproducible-scoring.png)
+
+16. [Simplified Settings & tools hub](16-settings-tools.png)
+17. [Readable downloaded software test summary](17-readable-evaluation-summary.png)
+18. [Candidate job-match workspace](18-candidate-match.png)
+
+The latest full browser report identifies current-interface captures. Earlier offline-provider captures remain as historical evidence. All examples are synthetic.

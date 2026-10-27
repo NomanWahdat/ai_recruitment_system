@@ -1,28 +1,24 @@
 "use client";
+import { useState } from "react";
+import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient, errorMessage } from "@/lib/axios";
-import type { Page, Task } from "@/types/domain";
+import type { Dashboard, Page, Task } from "@/types/domain";
 import { reprocessAutomation, rerunMatchingEngine } from "@/services/automationService";
-
+import { AdvancedPageLink } from "@/components/ui/HiringSteps";
+import { Pagination } from "@/components/ui/Pagination";
+const names: Record<string,string> = {extract: "Read a resume", match_candidate: "Compare a candidate with your jobs", match_job: "Update a job's candidate matches"};
+const states: Record<string,string> = {queued: "Waiting", running: "In progress", completed: "Finished", failed: "Needs attention"};
 export default function AutomationPage() {
-  const cache=useQueryClient();
-  const tasks=useQuery({queryKey:["tasks"],queryFn:async()=>(await apiClient.get<Page<Task>>("/tasks/")).data,refetchInterval:3000});
-  const action=useMutation({mutationFn:async(url:string)=>(await apiClient.post(url)).data,
-    onSuccess:()=>{cache.invalidateQueries();}});
-  const queue=useMutation({mutationFn:(kind:string)=>kind==="profiles"?reprocessAutomation():rerunMatchingEngine(),
-    onSuccess:()=>{cache.invalidateQueries();}});
-  return <div className="space-y-6"><h2 className="text-2xl font-semibold">Persistent processing tasks</h2>
-    <p className="text-slate-600">Tasks survive web-server restarts. Failed tasks need an explicit retry; worker crashes are recovered after a lease expires.</p>
-    <div className="flex flex-wrap gap-3"><button disabled={queue.isPending} onClick={()=>queue.mutate("profiles")} className="rounded-xl bg-blue-600 px-4 py-3 text-white">Queue profile processing</button>
-      <button disabled={queue.isPending} onClick={()=>queue.mutate("matches")} className="rounded-xl border bg-white px-4 py-3">Queue matching for my jobs</button></div>
-    {queue.isSuccess && <p role="status">{queue.data.queued} tasks queued. Completion is tracked below.</p>}
-    {(action.isError||queue.isError||tasks.isError) && <p role="alert" className="text-rose-700">{errorMessage(action.error||queue.error||tasks.error)}</p>}
-    <div className="space-y-3">{tasks.data?.results.map(task=><article key={task.id} className="rounded-2xl border bg-white p-5">
-      <div className="flex flex-wrap items-center justify-between gap-3"><h3 className="font-semibold">Task #{task.id} · {task.kind}</h3><span className={task.status==="failed"?"text-rose-700":"text-blue-700"}>{task.status}</span></div>
-      <p className="mt-2 text-sm text-slate-600">Candidate {task.candidate||"?"} · Job {task.job||"?"} · Attempts {task.attempts}</p>
-      {task.error && <p className="mt-2 text-rose-700">{task.error}</p>}
-      {task.status==="failed" && <button disabled={action.isPending} onClick={()=>action.mutate(`/tasks/${task.id}/retry/`)} className="mt-3 rounded-lg border px-3 py-2">Retry task</button>}
-    </article>)}</div>
-    {tasks.data?.count===0 && <p>No tasks yet.</p>}
+  const cache = useQueryClient(); const [page,setPage] = useState(1);
+  const tasks = useQuery({queryKey: ["tasks",page], queryFn: async () => (await apiClient.get<Page<Task>>("/tasks/", {params: {page}})).data, refetchInterval: 3000});
+  const health = useQuery({queryKey: ["dashboard"], queryFn: async () => (await apiClient.get<Dashboard>("/dashboard/")).data, refetchInterval: 10000});
+  const action = useMutation({mutationFn: async (url: string) => (await apiClient.post(url)).data, onSuccess: () => cache.invalidateQueries()});
+  const queue = useMutation({mutationFn: (kind: string) => kind === "profiles" ? reprocessAutomation() : rerunMatchingEngine(), onSuccess: () => cache.invalidateQueries()});
+  return <div className="space-y-6"><AdvancedPageLink/><div><h2 className="text-2xl font-semibold">Processing activity</h2><p className="mt-2 text-slate-600">Resumes are read and compared in the background. You can keep working while this happens.</p></div>{health.data && <p role="status" className={`rounded-xl p-4 text-sm ${health.data.worker_online ? "bg-blue-50 text-blue-900" : "bg-amber-50 text-amber-900"}`}>{health.data.worker_online ? "Resume processing is available." : "The processing service is not responding. Your files are saved; check again shortly."}</p>}
+    <details className="rounded-xl border bg-white p-5"><summary className="cursor-pointer text-sm font-medium">Advanced: refresh your whole candidate pool</summary><p className="mt-3 text-sm text-slate-600">These actions process all your candidates or all your jobs. To update one comparison, open that candidate or job instead.</p><div className="mt-4 flex flex-wrap gap-3"><button disabled={queue.isPending} onClick={() => queue.mutate("profiles")} className="rounded-xl border px-4 py-2 text-sm">Reprocess all my candidates</button><button disabled={queue.isPending} onClick={() => queue.mutate("matches")} className="rounded-xl border px-4 py-2 text-sm">Refresh matches for all my jobs</button></div></details>
+    {queue.isSuccess && <p role="status" className="text-sm">{queue.data.queued} processing steps scheduled. Follow their progress below.</p>}{(action.isError || queue.isError || tasks.isError || health.isError) && <p role="alert" className="text-rose-700">{errorMessage(action.error || queue.error || tasks.error || health.error)}</p>}
+    <div className="space-y-3">{tasks.data?.results.map(task => <article key={task.id} className="space-y-3 rounded-2xl border bg-white p-5"><div className="flex flex-wrap items-center justify-between gap-3"><h3 className="font-semibold">{names[task.kind] || "Process recruitment details"}</h3><span className={`rounded-full px-3 py-1 text-xs ${task.status === "failed" ? "bg-amber-50 text-amber-900" : "bg-slate-100 text-slate-600"}`}>{states[task.status] || task.status}</span></div><div className="flex flex-wrap gap-4 text-sm text-blue-700">{task.candidate && <Link href={`/candidates/${task.candidate}`}>Open candidate</Link>}{task.job && <Link href={`/jobs/${task.job}`}>Open job</Link>}</div>{task.error && <p className="text-sm text-amber-900">{task.error}</p>}{task.status === "failed" && <button disabled={action.isPending} onClick={() => action.mutate(`/tasks/${task.id}/retry/`)} className="rounded-xl border px-4 py-2 text-sm">Try again</button>}<details className="text-xs text-slate-500"><summary className="cursor-pointer">Processing details</summary><p className="mt-2">Task #{task.id}; type {task.kind}; status {task.status}; attempts {task.attempts}.</p></details></article>)}</div>{tasks.data?.count === 0 && <p className="rounded-xl border bg-white p-5 text-sm">Nothing is processing yet. Upload a resume to get started.</p>}<Pagination page={page} count={tasks.data?.count || 0} onChange={setPage}/>
+    <details className="text-xs text-slate-500"><summary>How background processing works</summary><p className="mt-2">Saved processing tasks survive server restarts. A stopped process is recovered after its task lease expires; a failed task can be retried explicitly. Current worker heartbeat: {health.data?.worker_online ? "received" : "not received"}.</p></details>
   </div>;
 }
